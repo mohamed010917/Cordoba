@@ -12,6 +12,6 @@ class CountrieSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        \App\Models\Countrie::factory(100)->create();
     }
 }

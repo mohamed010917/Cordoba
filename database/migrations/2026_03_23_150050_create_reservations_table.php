@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId("client_id")->constrained("users")->onDelete("cascade");
+            $table->foreignId("room_id")->constrained()->onDelete("cascade");
+            $table->integer("accompany_number");
+            $table->bigInteger("paid_price_cents");
+            $table->foreignId("receptionist_id")->nullable()->constrained("users")->
+            onDelete("set null");
             $table->timestamps();
         });
     }

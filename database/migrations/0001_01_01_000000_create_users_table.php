@@ -17,6 +17,18 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string("image")->nullable();
+            $table->string("role")->default("user");
+            $table->boolean("is_active")->default(true);
+            $table->boolean("is_banned")->default(false);
+            $table->string("phone")->nullable();
+            $table->string("national_id")->nullable();
+            $table->foreignId('created_by_manager_id')->nullable()->constrained('users')->onDelete('set null'); 
+            $table->enum('gender', ['male', 'female' , 'other'])->nullable();
+            $table->timestamp('approved_at')->nullable();
+            $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');   
+            $table->timestamp('banned_at')->nullable();
+            $table->foreignId('banned_by')->nullable()->constrained('users')->onDelete('set null');
             $table->rememberToken();
             $table->timestamps();
         });
@@ -35,7 +47,14 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+
+        // make relationship between users and countries tables after creting users and countries tables
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignId('country_id')->nullable()->constrained()->onDelete('set null');
+        });
     }
+
+
 
     /**
      * Reverse the migrations.

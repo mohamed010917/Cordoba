@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('approvals', function (Blueprint $table) {
             $table->id();
+            $table->foreignId("user_id")->constrained()->onDelete("cascade");
+            $table->foreignId("approved_by")->nullable()->constrained("users")->onDelete("set null");
+            $table->timestamp("approved_at")->nullable();   
+            $table->foreignId("banned_by")->nullable()->constrained("users")->onDelete("set null");
+            $table->timestamp("banned_at")->nullable();
+            
             $table->timestamps();
         });
     }

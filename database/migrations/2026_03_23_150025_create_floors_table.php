@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('floors', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->integer("number") ;
+            $table->foreignId("manger_id")->nullable()->constrained("users")->onDelete("set null");
+            
             $table->timestamps();
         });
     }

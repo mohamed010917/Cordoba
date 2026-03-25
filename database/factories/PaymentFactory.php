@@ -18,7 +18,12 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+        
+            'reservation_id' => \App\Models\reservation::inRandomOrder()->first()->id ?? null,
+            'amount_cents' => $this->faker->numberBetween(1000, 100000),
+            'payment_method' => $this->faker->randomElement(['credit_card', 'paypal', 'stripe']),
+            'status' => $this->faker->randomElement(['pending', 'completed', 'failed']),
+            'transaction_id' => $this->faker->uuid(),
         ];
     }
 }

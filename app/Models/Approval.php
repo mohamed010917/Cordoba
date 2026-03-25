@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ban extends Model
+class Approval extends Model
 {
-    /** @use HasFactory<\Database\Factories\BanFactory> */
+    /** @use HasFactory<\Database\Factories\ApprovalFactory> */
     use HasFactory;
 }

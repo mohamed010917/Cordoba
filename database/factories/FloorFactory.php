@@ -18,7 +18,9 @@ class FloorFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->word(),
+            'manger_id' => \App\Models\User::where('role', 'manager')->inRandomOrder()->first()->id ?? null,
+            "number" => $this->faker->numberBetween(1, 10),
         ];
     }
 }

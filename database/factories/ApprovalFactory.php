@@ -18,7 +18,12 @@ class ApprovalFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+                'user_id' => \App\Models\User::inRandomOrder()->first()->id ?? null,
+                'approved_by' => \App\Models\User::where('role', 'admin')->inRandomOrder()->first()->id ?? null,
+                'approved_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
+                'banned_by' => \App\Models\User::where('role', 'admin')->inRandomOrder()->first()->id ?? null,
+                'banned_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            
         ];
     }
 }
