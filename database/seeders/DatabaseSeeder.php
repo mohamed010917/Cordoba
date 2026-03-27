@@ -19,10 +19,18 @@ class DatabaseSeeder extends Seeder
      
         $admin = Role::create(['name' => 'admin']);
         $manager = Role::create(['name' => 'manager']);
-        $receptionist = Role::create(['name' => 'user']);
+        $client = Role::create(['name' => 'user']);
+        $receptionist = Role::create(['name' => 'receptionist']);
 
+        
 
         // premsions
+        Permission::create(['name' => 'create users']);
+        Permission::create(['name' => 'edit users']);
+        Permission::create(['name' => 'delete users']);
+        Permission::create(['name' => 'view users']);
+        $admin->givePermissionTo(Permission::all());
+        $manager->givePermissionTo(['view users' , 'edit users' , 'create users' , 'delete users']);
 
      
         // User::factory(10)->create();
@@ -44,9 +52,16 @@ class DatabaseSeeder extends Seeder
             'role' => 'user',
         ]);
 
+        $receptionist = User::factory()->create([
+            'name' => 'receptionist ',
+            'email' => 'rec@rec.rec' ,
+            'role' => 'receptionist',
+        ]);
+
         $admin->assignRole("admin");
         $manager->assignRole("manager");
         $user->assignRole("user");
+        $receptionist->assignRole("receptionist");
 
 
         User::factory(30)->create();

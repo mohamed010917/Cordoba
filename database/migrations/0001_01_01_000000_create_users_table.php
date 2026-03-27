@@ -30,6 +30,7 @@ return new class extends Migration
             $table->timestamp('banned_at')->nullable();
             $table->foreignId('banned_by')->nullable()->constrained('users')->onDelete('set null');
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 

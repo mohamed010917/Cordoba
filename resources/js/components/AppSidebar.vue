@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-vue-next';
-import AppLogo from '@/components/AppLogo.vue';
-import NavFooter from '@/components/NavFooter.vue';
+import {  Link, usePage } from '@inertiajs/vue3';
+import {  LayoutGrid } from 'lucide-vue-next';
+
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
+   
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
@@ -25,7 +21,13 @@ const role = page.props.auth.user.role ;
 const admin: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: "/admin/dashboard" ,
+        icon: LayoutGrid,
+    },
+
+    {
+        title: 'users',
+        href: '/admin/users',
         icon: LayoutGrid,
     },
 ];
