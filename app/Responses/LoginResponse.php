@@ -18,6 +18,10 @@ class LoginResponse implements LoginResponseContract
             return redirect()->route('manager.dashboard');
         }
 
+        if($user->role === 'receptionist'){
+            return redirect()->route('receptionist.dashboard');
+        }
+
         return redirect()->route('dashboard');
     }
 }

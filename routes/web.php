@@ -3,6 +3,7 @@
 use App\Http\Controllers\admin\UserController;
 use App\Http\Middleware\Admin;
 use App\Http\Middleware\Manger;
+use App\Http\Middleware\receptionist;
 use App\Http\Middleware\User;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -20,6 +21,13 @@ Route::middleware(['auth', 'verified' , User::class])->group(function () {
 
 Route::middleware(['auth', Manger::class , 'verified'])->prefix('manager')
 ->name('manager.')
+->group(function (){
+    Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+}) ; 
+
+// receptionist
+Route::middleware(['auth', receptionist::class , 'verified'])->prefix('receptionist')
+->name('receptionist.')
 ->group(function (){
     Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
 }) ; 

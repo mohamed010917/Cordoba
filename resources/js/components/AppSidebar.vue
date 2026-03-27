@@ -48,10 +48,19 @@ const user: NavItem[] = [
     },
 ];
 
+const receptionist: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: "/receptionist/dashboard",
+        icon: LayoutGrid,
+    },
+];
 
 const items = computed(() => {
     if (role === 'admin') return admin
     if (role === 'manager') return manger
+   
+    if (role === 'receptionist') return receptionist
     return user
 })
 </script>
