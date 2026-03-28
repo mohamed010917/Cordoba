@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\MangerController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Middleware\Admin;
 use App\Http\Middleware\Manger;
@@ -41,6 +42,8 @@ Route::middleware(['auth', Admin::class , 'verified'])->prefix('admin')
     Route::post("users/{user}/toggle-ban" , [UserController::class , "toggleBan"])->name("users.toggle-ban") ;
     Route::post("users/{user}/toggle-active" , [UserController::class , "toggleActive"])->name("users.toggle-active") ;
     Route::post("users/{user}/toggle-role" , [UserController::class , "changRole"])->name("users.toggle-role") ;
+    Route::post("users/{user}/approve" , [UserController::class , "approve"])->name("users.approve") ;
+    Route::resource("mangers" , MangerController::class) ;
 }) ;
 
 

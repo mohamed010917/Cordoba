@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {  Link, usePage } from '@inertiajs/vue3';
-import {  LayoutGrid } from 'lucide-vue-next';
+import {  LayoutGrid, User2Icon } from 'lucide-vue-next';
 
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -28,7 +28,12 @@ const admin: NavItem[] = [
     {
         title: 'users',
         href: '/admin/users',
-        icon: LayoutGrid,
+        icon: User2Icon,
+    },
+    {
+        title: 'Mangers',
+        href: '/admin/mangers',
+        icon: User2Icon,
     },
 ];
 
