@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string("national_id")->nullable();
             $table->foreignId('created_by_manager_id')->nullable()->constrained('users')->onDelete('set null'); 
             $table->enum('gender', ['male', 'female' , 'other'])->nullable();
+            $table->boolean("is_approved")->default(false) ;
             $table->timestamp('approved_at')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');   
             $table->timestamp('banned_at')->nullable();

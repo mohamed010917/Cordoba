@@ -17,27 +17,13 @@ class UserController extends Controller
    
  
         
-    public function index(Request $request)
+    public function index(Request $request )
     {
-        $users = User::with("country");
+        $IndexAction = new \App\Actions\user\Index() ;
+        $users = $IndexAction->handle($request) ;
 
-        if ($request->search) {
-            $users->where(function ($q) use ($request) {
-                $q->where("name", "like", "%{$request->search}%")
-                ->orWhere("email", "like", "%{$request->search}%");
-            });
-        }
-
-        if ($request->role) {
-            $users->where("role", $request->role);
-        }
-
-        if ($request->active !== null && $request->active !== '') {
-            $users->where("is_active", $request->active);
-        }
-
-        return Inertia::render('admin/users', [
-            "users" => $users->paginate(20)->withQueryString()
+        return Inertia::render('users/users', [
+            "users" => $users
         ]);
     }
     
@@ -47,7 +33,7 @@ class UserController extends Controller
    
     public function create()
     {
-        return Inertia::render('admin/create' ,  [
+        return Inertia::render('users/create' ,  [
             'countries' => Countrie::all()
         ]);
     }
@@ -55,36 +41,20 @@ class UserController extends Controller
    
     public function store(userCreate $request)
     {
-        if(! Auth::user()->hasRole('admin') &&( $request->role === 'admin' || $request->role === 'manager') ){
-            abort(402);
+        $CreateAction = new \App\Actions\user\Create() ;
+        $user = $CreateAction->handle($request) ;
+        if(!$user){
+            return redirect()->back()->with("error" , "An error occurred while creating the user");
         }
-        if($request->hasFile('image')){
-            $imagePath = $request->file('image')->store('users', 'public');
-        }
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make( $request->password),
-            'image' => asset('storage/' . $imagePath) ,
-            'role' => $request->role,
-            'is_active' => $request->is_active,
-            'phone' => $request->phone,
-            'national_id' => $request->national_id,
-            'country' => $request->country_id ,
-            "created_by_manager_id" => Auth::id() ,
-            "gender" => $request->gender ,
-        ]);
 
-        $user->assignRole($request->role) ;
-
-        return redirect()->route('admin.users.index');
+        return redirect()->route('users.users.index');
     }
 
  
     public function show(User $user)
     {
      
-        return Inertia::render('admin/show' ,  [
+        return Inertia::render('users/show' ,  [
             'user' => $user->load(([
                                 'country',
                                 'createdByManager',
@@ -97,7 +67,7 @@ class UserController extends Controller
  
     public function edit(User $user)
     {
-        return Inertia::render('admin/edit' ,  [
+        return Inertia::render('users/edit' ,  [
             'user' => $user->load("country"),
             'countries' => Countrie::all()
         ]);
@@ -119,7 +89,7 @@ class UserController extends Controller
                
             ]);
             $user->syncRoles($request->role) ;
-            return redirect()->route('admin.users.index')->with("success" , "User updated successfully");
+            return redirect()->route('.users.index')->with("success" , "User updated successfully");
         }catch(\Exception $e){
             return redirect()->back()->with("error" , "An error occurred while updating the user");
         }
@@ -172,5 +142,28 @@ class UserController extends Controller
             return redirect()->back()->with("success" , "User role changed successfully");
         }
         redirect()->back()->with("error" , "You dont have permission to change user role");
+    }
+
+    public function toggleActive(User $user  ){
+        if(Auth::user()->can('edit users')){
+            if(Auth::id() === $user->id){
+                return redirect()->back()->with("error" , "cant change your self active status");
+            }
+            $user->is_active = ! $user->is_active ;
+            $user->save();
+            return redirect()->back()->with("success" , "User active status toggled successfully");
+        }
+        abort(403);
+    }
+
+    public function approve(User $user){
+        if(Auth::user()->can('edit users')){
+            $user->is_approved = true ;
+            $user->approved_by = Auth::id() ;
+            $user->approved_at = now() ;
+            $user->save();
+            return redirect()->back()->with("success" , "User approved successfully");
+        }
+        abort(403);
     }
 }

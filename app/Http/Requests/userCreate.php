@@ -28,11 +28,12 @@ class userCreate extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8'],
             'image' => ['nullable', 'image', 'max:2048' , 'mimes:jpg,jpeg,png,gif'],
-            'role' => ['required', 'in:admin,manager,user'],
+            'role' => ['required', 'in:admin,manager,user,receptionist'],
             'is_active' => ['required', 'boolean'],
             'phone' => ['nullable', 'string', 'max:20'],
             'national_id' => ['nullable', 'string', 'max:20'],
             'gender' => ['nullable', 'in:male,female,other'],   
+            "country_id" => ['required' , 'exists:countries,id'],
 
         ];
     }
