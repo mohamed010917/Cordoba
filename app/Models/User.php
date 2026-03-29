@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password', 'image', 'role', 'is_active', 'is_banned', 'phone', 'national_id', 'created_by_manager_id', 'gender', 'is_approved', 'approved_at', 'approved_by', 'banned_at', 'banned_by', 'last_login_at'])]
@@ -18,8 +19,9 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory;
+    use HasApiTokens;
 
+    use HasFactory;
     use HasRoles;
     use Notifiable;
     use SoftDeletes;
