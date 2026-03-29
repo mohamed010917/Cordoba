@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,13 +13,17 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password' , 'image' , 'role' , 'is_active' , 'is_banned' , 'phone' , 'national_id' , 'created_by_manager_id' , 'gender' , 'approved_at' , 'approved_by' , 'banned_at' , 'banned_by'])]
+#[Fillable(['name', 'email', 'password', 'image', 'role', 'is_active', 'is_banned', 'phone', 'national_id', 'created_by_manager_id', 'gender', 'is_approved', 'approved_at', 'approved_by', 'banned_at', 'banned_by', 'last_login_at'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    // soft delete
-    use HasFactory, Notifiable, TwoFactorAuthenticatable , HasRoles , SoftDeletes;
+    use HasFactory;
+
+    use HasRoles;
+    use Notifiable;
+    use SoftDeletes;
+    use TwoFactorAuthenticatable;
 
     /**
      * Get the attributes that should be cast.
@@ -30,6 +34,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'approved_at' => 'datetime',
+            'banned_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
@@ -59,8 +66,4 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->approved_at !== null;
     }
-
-
-
-
 }

@@ -32,6 +32,20 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
+    public function test_successful_login_updates_the_last_login_timestamp(): void
+    {
+        $user = User::factory()->create([
+            'last_login_at' => null,
+        ]);
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('dashboard', absolute: false));
+
+        $this->assertNotNull($user->fresh()->last_login_at);
+    }
+
     public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge()
     {
         $this->skipUnlessFortifyFeature(Features::twoFactorAuthentication());

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 /**
  * @extends Factory<User>
@@ -24,7 +25,6 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
@@ -36,8 +36,8 @@ class UserFactory extends Factory
             'is_banned' => false,
             'phone' => fake()->phoneNumber(),
             'national_id' => fake()->unique()->numerify('##########'),
-            'created_by_manager_id' => null,    
-            'gender' => fake()->randomElement(['male', 'female', 'other']), 
+            'created_by_manager_id' => null,
+            'gender' => fake()->randomElement(['male', 'female', 'other']),
             'approved_at' => null,
             'approved_by' => null,
             'banned_at' => null,
@@ -47,6 +47,22 @@ class UserFactory extends Factory
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
         ];
+    }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            $roleName = $user->role ?? 'user';
+
+            Role::findOrCreate($roleName, 'web');
+
+            if (! $user->hasRole($roleName)) {
+                $user->assignRole($roleName);
+            }
+        });
     }
 
     /**
