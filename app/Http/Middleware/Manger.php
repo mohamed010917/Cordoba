@@ -9,13 +9,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Manger
 {
-  
     public function handle(Request $request, Closure $next): Response
     {
-
-        if(!Auth::check() || ! Auth::user()->role === 'manager' || !Auth::user()->hasRole('manager') ){
+        if (! Auth::check() || Auth::user()->role !== 'manager' || ! Auth::user()->hasRole('manager')) {
             abort(403, 'Unauthorized');
         }
+
         return $next($request);
     }
 }

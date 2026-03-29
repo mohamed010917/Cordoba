@@ -6,18 +6,20 @@ use App\Actions\user\Index;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class MangerController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
-        $IndexAction = new Index() ;
-        $managers = $IndexAction->handle("manager") ;
+        $indexAction = new Index;
+        $managers = $indexAction->handle($request, 'manager');
+
         return Inertia::render('admin/managers', [
-            "managers" => $managers
+            'managers' => $managers,
         ]);
     }
 
