@@ -9,12 +9,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class User
 {
- 
     public function handle(Request $request, Closure $next): Response
     {
-        if(!Auth::check() || Auth::user()->role !== 'user' || !Auth::user()->hasRole('user') ){
+        if (! Auth::check() || Auth::user()->role !== 'user' || ! Auth::user()->hasRole('user')) {
             abort(403, 'Unauthorized');
         }
+
         return $next($request);
     }
 }
