@@ -1,15 +1,16 @@
-import { route } from 'ziggy-js'
-
+import { router } from '@inertiajs/vue3'
 import {
   getCoreRowModel,
-  useVueTable,
-  type ColumnDef,
-  type PaginationState,
-  type SortingState,
+  useVueTable
+  
+  
+  
 } from '@tanstack/vue-table'
-
+import type {ColumnDef, PaginationState, SortingState} from '@tanstack/vue-table';
 import { ref, watch } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { route } from 'ziggy-js'
+
+
 
 
 export interface PaginatedData<T> {
@@ -61,15 +62,25 @@ export function useDataTable<TData, TValue>(options: {
   }
 
   const table = useVueTable({
-    get data() { return options.paginatedData().data },
-    get columns() { return options.columns },
+    get data() {
+ return options.paginatedData().data 
+},
+    get columns() {
+ return options.columns 
+},
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     manualSorting: true,
-    get pageCount() { return options.paginatedData().last_page },
+    get pageCount() {
+ return options.paginatedData().last_page 
+},
     state: {
-      get pagination() { return pagination.value },
-      get sorting() { return sorting.value },
+      get pagination() {
+ return pagination.value 
+},
+      get sorting() {
+ return sorting.value 
+},
     },
     onPaginationChange: (updater) => {
       const next = typeof updater === 'function' ? updater(pagination.value) : updater
@@ -79,12 +90,14 @@ export function useDataTable<TData, TValue>(options: {
     onSortingChange: (updater) => {
       const next = typeof updater === 'function' ? updater(sorting.value) : updater
       sorting.value = next
+
       if (next.length > 0) {
         sortBy.value = next[0].id
         sortDir.value = next[0].desc ? 'desc' : 'asc'
       } else {
         sortBy.value = ''
       }
+
       navigate({ page: 1 })
     },
   })
