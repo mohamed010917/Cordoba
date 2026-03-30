@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
 import { Head, useForm, usePage } from '@inertiajs/vue3'
+import { ref, nextTick } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { BreadcrumbItem } from '@/types'
+import type { BreadcrumbItem } from '@/types'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -39,7 +39,11 @@ const submit = () => {
         onError: async () => {
             await nextTick()
             const el = document.querySelector('.error-input') as HTMLElement
-            if (el) el.focus()
+
+            if (el) {
+el.focus()
+}
+
             showToast('Please fix errors ❌')
         },
         onSuccess: () => {

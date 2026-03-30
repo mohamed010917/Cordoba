@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, usePage, router } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
 import { ref, computed } from 'vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 const page = usePage()
 const user = page.props.user
@@ -28,9 +28,18 @@ const deleteUser = () => {
 }
 
 const statusConfig = computed(() => {
-    if (user.banned_at) return { label: 'Banned', class: 'status-banned', dot: '#ef4444' }
-    if (user.is_active && user.approved_at) return { label: 'Active', class: 'status-active', dot: '#22c55e' }
-    if (!user.approved_at) return { label: 'Pending', class: 'status-pending', dot: '#f59e0b' }
+    if (user.banned_at) {
+return { label: 'Banned', class: 'status-banned', dot: '#ef4444' }
+}
+
+    if (user.is_active && user.approved_at) {
+return { label: 'Active', class: 'status-active', dot: '#22c55e' }
+}
+
+    if (!user.approved_at) {
+return { label: 'Pending', class: 'status-pending', dot: '#f59e0b' }
+}
+
     return { label: 'Inactive', class: 'status-inactive', dot: '#6b7280' }
 })
 
