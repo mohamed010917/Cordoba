@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {  Link, usePage } from '@inertiajs/vue3';
-import {  LayoutGrid, User2Icon } from 'lucide-vue-next';
+import {  BookAIcon, Flower2Icon, LayoutGrid, Magnet, User2Icon } from 'lucide-vue-next';
 
 import { computed } from 'vue';
 import NavMain from '@/components/NavMain.vue';
@@ -41,8 +41,18 @@ const admin: NavItem[] = [
 const manger: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: "/manager/dashboard",
         icon: LayoutGrid,
+    },
+       {
+        title: 'floors',
+        href:"/manager/floors",
+        icon: Flower2Icon,
+    },
+       {
+        title: 'rooms',
+        href: "/manager/rooms",
+        icon: Magnet,
     },
 ];
 const user: NavItem[] = [
@@ -51,6 +61,16 @@ const user: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+      {
+        title: 'My Reservations',
+        href: "/my-reservations",
+        icon: BookAIcon,
+    },
+    {
+        title: 'rooms',
+        href: "/rooms",
+        icon: User2Icon,
+    }
 ];
 
 const receptionist: NavItem[] = [

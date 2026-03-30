@@ -35,19 +35,7 @@ Route::middleware(['auth', Manger::class, 'verified'])->prefix('manager')
     });
 
 
-Route::middleware(['auth', Receptionist::class, 'verified'])->prefix('receptionist')
-    ->name('receptionist.')
-    ->group(function () {
-        Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
-    });
 
-// manger routes
-
-Route::middleware(['auth', Manger::class , 'verified'])->prefix('manager')
-->name('manager.')
-->group(function (){
-    Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
-}) ; 
 
 // receptionist
 Route::middleware(['auth', receptionist::class , 'verified'])->prefix('receptionist')
@@ -68,7 +56,7 @@ Route::middleware(['auth', Admin::class, 'verified'])->prefix('admin')
         Route::post('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
         Route::post('users/{user}/toggle-role', [UserController::class, 'changRole'])->name('users.toggle-role');
         Route::post('users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
-        Route::resource('mangers', MangerController::class);
+        Route::resource('managers', MangerController::class);
     });
 
 require __DIR__.'/settings.php';

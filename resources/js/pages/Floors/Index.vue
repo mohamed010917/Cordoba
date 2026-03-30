@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, h } from 'vue'
-import { router, Link } from '@inertiajs/vue3'
+import { router, Link, Head } from '@inertiajs/vue3'
 import { type ColumnDef } from '@tanstack/vue-table'
 import { Button } from '@/components/ui/button'
 import DataTable from '@/components/shared/DataTable.vue'
 
 import { route } from 'ziggy-js'
+import AppLayout from '@/layouts/AppLayout.vue'
+console.log(route().has('manager.floors.create'))
 
 interface Floor {
     id: number
@@ -100,23 +102,31 @@ function deleteFloor(floor: Floor) {
         onError: (errors) => alert(Object.values(errors).join('\n')),
     })
 }
+
+const breadcrumbs = [
+    { title: 'Floors', href: '/Manger/Floors' },
+]
 </script>
 
 <template>
-    <div class="p-6 space-y-4">
-        <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-semibold">Manage Floors</h1>
-            <Link :href="route('manager.floors.create')">
-                <Button>Add Floor</Button>
-            </Link>
-        </div>
+    <Head title="Manage Floors" />
+    <AppLayout :breadcrumbs="breadcrumbs">
 
-        <DataTable
-            :columns="columns"
-            :paginatedData="floors"
-            routeName="manager.floors.index"
-            :filters="filters"
-            searchPlaceholder="Search by name or number..."
-        />
-    </div>
+        <div class="p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-semibold">Manage Floors</h1>
+                <Link :href="route('manager.floors.create')">
+                    <Button>Add Floor</Button>
+                </Link>
+            </div>
+    
+            <DataTable
+                :columns="columns"
+                :paginatedData="floors"
+                routeName="manager.floors.index"
+                :filters="filters"
+                searchPlaceholder="Search by name or number..."
+            />
+        </div>
+    </AppLayout>
 </template>
