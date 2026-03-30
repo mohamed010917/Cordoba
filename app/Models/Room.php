@@ -19,6 +19,7 @@ class Room extends Model
         'floor_id',
         'manager_id',
     ];
+
     public function floor(): BelongsTo
     {
         return $this->belongsTo(Floor::class);
@@ -33,8 +34,6 @@ class Room extends Model
     {
         return $this->hasMany(Reservation::class);
     }
-<<<<<<< Updated upstream
-=======
 
     /**
      * Scope a query to only include available rooms.
@@ -44,5 +43,4 @@ class Room extends Model
     {
         return $query->whereDoesntHave('reservations');
     }
->>>>>>> Stashed changes
 }
