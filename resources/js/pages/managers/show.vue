@@ -1,57 +1,62 @@
 <script setup lang="ts">
 import { Head, usePage, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const page = usePage()
-const user = page.props.user
+const user = ref(page.props.user)
 
+watch(() => page.props.user, (newUser) => {
+    user.value = newUser
+})
 const loading = ref<string | null>(null)
 
 const approveUser = () => {
     loading.value = 'approve'
-    router.post(`/admin/managers/${user.id}/approve`, {}, { onFinish: () => loading.value = null })
+    router.post(`/admin/users/${user.value.id}/approve`, {}, { onFinish: () => loading.value = null })
 }
 const banUser = () => {
     loading.value = 'ban'
-    router.post(`/admin/managers/${user.id}/ban`, {}, { onFinish: () => loading.value = null })
+    router.post(`/admin/users/${user.value.id}/toggle-ban`, {}, { onFinish: () => loading.value = null })
 }
 const activateUser = () => {
     loading.value = 'activate'
-    router.post(`/admin/managers/${user.id}/activate`, {}, { onFinish: () => loading.value = null })
+    router.post(`/admin/users/${user.value.id}/toggle-active`, {}, { onFinish: () => loading.value = null })
 }
 const deleteUser = () => {
     if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
         loading.value = 'delete'
-        router.delete(`/admin/managers/${user.id}`, { onFinish: () => loading.value = null })
+        router.delete(`/admin/managers/${user.value.id}`, { onFinish: () => loading.value = null })
     }
 }
 
 const statusConfig = computed(() => {
-    if (user.banned_at) return { label: 'Banned', class: 'status-banned', dot: '#ef4444' }
-    if (user.is_active && user.approved_at) return { label: 'Active', class: 'status-active', dot: '#22c55e' }
-    if (!user.approved_at) return { label: 'Pending', class: 'status-pending', dot: '#f59e0b' }
+    if (user.value.banned_at) return { label: 'Banned', class: 'status-banned', dot: '#ef4444' }
+    if (user.value.is_active && user.value.approved_at) return { label: 'Active', class: 'status-active', dot: '#22c55e' }
+    if (!user.value.is_approved) return { label: 'Pending', class: 'status-pending', dot: '#f59e0b' }
     return { label: 'Inactive', class: 'status-inactive', dot: '#6b7280' }
 })
 
 const initials = computed(() => {
-    return user.name?.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase() || '?'
+    return user.value.name?.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase() || '?'
 })
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Show manager' ,
+        href: "/admin/managers" ,
+    },
+]
+
 </script>
 
 <template>
     <Head title="User Details" />
-    <AppLayout>
+    <AppLayout :breadcrumbs="breadcrumbs">
         <div class="ud-root">
+            {{ console.log(user) }}
 
-            <!-- BREADCRUMB -->
-            <nav class="ud-breadcrumb">
-                <span>Admin</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-                <span>managers</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-                <span class="ud-breadcrumb__current">{{ user.name }}</span>
-            </nav>
+  
 
             <!-- HERO CARD -->
             <div class="ud-hero">
@@ -83,11 +88,12 @@ const initials = computed(() => {
                                 <span class="ud-badge__dot"></span>
                                 {{ statusConfig.label }}
                             </span>
-                            <span v-if="user.approved_at" class="ud-badge ud-badge--approved">
+                           
+                            <span v-if="user.is_approved" class="ud-badge ud-badge--approved">
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
                                 Approved
                             </span>
-                            <span v-if="user.banned_at" class="ud-badge ud-badge--banned">
+                            <span v-if="user.is_banned" class="ud-badge ud-badge--banned">
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
                                 Banned
                             </span>
@@ -156,15 +162,15 @@ const initials = computed(() => {
                     <div class="ud-card__body">
                         <div class="ud-row">
                             <span class="ud-row__label">Created By</span>
-                            <span class="ud-row__value">{{ user.created_by_manager?.name || '—' }}</span>
+                            <span class="ud-row__value">{{ user.createdBy_manager?.name || '—' }}</span>
                         </div>
                         <div class="ud-row">
                             <span class="ud-row__label">Approved By</span>
-                            <span class="ud-row__value">{{ user.approved_by?.name || '—' }}</span>
+                            <span class="ud-row__value">{{ user.approvedBy?.name || '—' }}</span>
                         </div>
                         <div class="ud-row">
                             <span class="ud-row__label">Banned By</span>
-                            <span class="ud-row__value">{{ user.banned_by?.name || '—' }}</span>
+                            <span class="ud-row__value">{{ user.bannedBy?.name || '—' }}</span>
                         </div>
                     </div>
                 </div>

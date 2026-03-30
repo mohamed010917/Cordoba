@@ -24,7 +24,7 @@ const form = useForm({
     name: '',
     email: '',
     password: '',
-    role: 'user',
+    role: 'manager',
     phone: '',
     national_id: '',
     gender: '',
@@ -157,15 +157,7 @@ const showToast = (msg: string) => {
                         </select>
                     </div>
 
-                    <!-- Role -->
-                    <div>
-                        <label class="form-label">Role</label>
-                        <select v-model="form.role" class="form-input">
-                            <option value="admin">Admin</option>
-                            <option value="manager">Manager</option>
-                            <option value="user">User</option>
-                        </select>
-                    </div>
+       
 
                     <!-- Country -->
                     <div>

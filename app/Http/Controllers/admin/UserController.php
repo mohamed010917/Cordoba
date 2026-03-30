@@ -125,7 +125,10 @@ class UserController extends Controller
 
             $user->save();
 
-            return redirect()->back()->with('success', 'User ban status toggled successfully');
+            return redirect()
+               ->back()->with("success" , "User ban status toggled successfully")
+              ->with("user", $user);
+
         }
 
         abort(403);
@@ -149,7 +152,9 @@ class UserController extends Controller
             return redirect()->back()->with('success', 'User role changed successfully');
         }
 
-        return redirect()->back()->with('error', 'You dont have permission to change user role');
+        redirect()->back()->with("error" , "You dont have permission to change user role")
+        ->with("user", $user) ;
+
     }
 
     public function toggleActive(User $user): RedirectResponse
@@ -162,7 +167,9 @@ class UserController extends Controller
             $user->is_active = ! $user->is_active;
             $user->save();
 
-            return redirect()->back()->with('success', 'User active status toggled successfully');
+            return redirect()->back()->with("success" , "User active status toggled successfully")
+            ->with("user", $user) ;
+
         }
 
         abort(403);
@@ -182,8 +189,9 @@ class UserController extends Controller
 
             $user->notify(new ClientApprovedNotification(Auth::user()->name));
 
-            return redirect()->back()->with('success', 'User approved successfully');
+            return redirect()->back()->with('success', 'User approved successfully')->with("user", $user) ;
         }
+  
 
         abort(403);
     }

@@ -4,7 +4,11 @@ namespace App\Http\Controllers\admin;
 
 use App\Actions\user\Index;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\userCreate;
+use App\Models\Countrie;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -37,7 +41,7 @@ class MangerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(userCreate $request)
     {
         $createAction = new \App\Actions\user\Create() ;
         $manager = $createAction->handle($request , "manager") ;
@@ -50,9 +54,9 @@ class MangerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $manager )
     {
-            $manager = \App\Models\User::findOrFail($id) ;
+            
             return Inertia::render('managers/show' ,  [
                 'user' => $manager->load(([
                                     'country',
@@ -64,10 +68,10 @@ class MangerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(User $manager)
     {
-        $manager = \App\Models\User::findOrFail($id) ;
-        $countries = \App\Models\Countrie::all() ;
+     
+        $countries = Countrie::all() ;
         return Inertia::render('managers/edit' ,  [
             'user' => $manager->load("country"),
             'countries' => $countries
@@ -77,10 +81,9 @@ class MangerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $manager)
     {
         try{
-            $manager = \App\Models\User::findOrFail($id) ;
             if($request->hasFile('image')){
                 $imagePath = $request->file('image')->store('users', 'public');
                 $manager->image = asset('storage/' . $imagePath) ;
@@ -103,12 +106,14 @@ class MangerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $manager)
     {
         try{
-            $manager = \App\Models\User::findOrFail($id) ;
+           if(Auth::user()->can('delete users') && $manager->id != Auth::id()){
             $manager->delete() ;
             return redirect()->route('admin.managers.index')->with("success" , "Manager deleted successfully");
+           }
+           abort(403 , "You don't have permission to delete this manager") ;
         }catch(\Exception $e){
             return redirect()->back()->with("error" , "An error occurred while deleting the manager");
         }
