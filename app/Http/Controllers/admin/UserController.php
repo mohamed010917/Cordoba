@@ -44,8 +44,8 @@ class UserController extends Controller
         if (! $user instanceof User) {
             return redirect()->back()->with('error', 'An error occurred while creating the user');
         }
-
         return redirect()->route('admin.users.index');
+
     }
 
     public function show(User $user): Response
@@ -83,11 +83,11 @@ class UserController extends Controller
                 'country_id' => $request->country_id,
             ]);
 
-            $user->syncRoles($request->role);
+            $user->syncRoles($request->role) ;
+            return redirect()->route('admin.users.index')->with("success" , "User updated successfully");
+        }catch(\Exception $e){
+            return redirect()->back()->with("error" , "An error occurred while updating the user");
 
-            return redirect()->route('admin.users.index')->with('success', 'User updated successfully');
-        } catch (\Exception $exception) {
-            return redirect()->back()->with('error', 'An error occurred while updating the user');
         }
     }
 

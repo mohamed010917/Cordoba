@@ -8,6 +8,7 @@ class Index
 {
     public function handle($request , $role = 'user' )
     {
+       
      $users = User::with("country")->where("role", $role);
 
         if ($request->search ) {

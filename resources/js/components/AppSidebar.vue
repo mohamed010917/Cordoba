@@ -32,7 +32,7 @@ const admin: NavItem[] = [
     },
     {
         title: 'Mangers',
-        href: '/admin/mangers',
+        href: '/admin/managers',
         icon: User2Icon,
     },
 ];
