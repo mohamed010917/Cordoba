@@ -1,62 +1,119 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import Heading from '@/components/Heading.vue';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import AppLayout from '@/layouts/AppLayout.vue';
+import { computed, h } from 'vue'
+import { router, Link } from '@inertiajs/vue3'
+import { type ColumnDef } from '@tanstack/vue-table'
+import { Button } from '@/components/ui/button'
+import DataTable from '@/components/shared/DataTable.vue'
+import { route } from 'ziggy-js'
 
 interface Room {
-    id: number;
-    number: string;
-    capacity: number;
-    price_cents: number;
-    floor?: {
-        number: number;
-    };
+    id: number
+    number: string
+    capacity: number
+    price_cents: number
+    floor?: { id: number; name: string; number: number }
+    manager?: { id: number; name: string }
 }
 
-defineProps<{
-    rooms: Room[];
-}>();
+interface PaginatedRooms {
+    data: Room[]
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
+    from: number
+    to: number
+}
 
-const formatPrice = (cents: number) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(cents / 100);
-};
+const props = defineProps<{
+    rooms: PaginatedRooms
+    isAdmin: boolean
+    filters: Record<string, string>
+}>()
+
+const formatPrice = (cents: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
+
+const columns = computed<ColumnDef<Room>[]>(() => {
+    const cols: ColumnDef<Room>[] = [
+        { accessorKey: 'number', header: 'Room #', enableSorting: true },
+        { accessorKey: 'capacity', header: 'Capacity', enableSorting: true },
+        {
+            id: 'price',
+            header: 'Price',
+            enableSorting: true,
+            cell: ({ row }) => formatPrice(row.original.price_cents),
+        },
+        {
+            id: 'floor',
+            header: 'Floor',
+            enableSorting: false,
+            cell: ({ row }) => row.original.floor ? `${row.original.floor.name} (#${row.original.floor.number})` : '—',
+        },
+    ]
+
+    if (props.isAdmin) {
+        cols.push({
+            id: 'manager_name',
+            header: 'Manager Name',
+            enableSorting: false,
+            cell: ({ row }) => row.original.manager?.name ?? '—',
+        })
+    }
+
+    cols.push({
+        id: 'actions',
+        header: 'Actions',
+        enableSorting: false,
+        cell: ({ row }) => {
+            const room = row.original
+            return h('div', { class: 'flex items-center gap-2' }, [
+                h(
+                    Link,
+                    { href: route('manager.rooms.edit', room.id) },
+                    { default: () => h(Button, { variant: 'outline', size: 'sm' }, { default: () => 'Edit' }) },
+                ),
+                h(
+                    Button,
+                    {
+                        variant: 'destructive',
+                        size: 'sm',
+                        onClick: () => deleteRoom(room),
+                    },
+                    { default: () => 'Delete' },
+                ),
+            ])
+        },
+    })
+
+    return cols
+})
+
+function deleteRoom(room: Room) {
+    if (!confirm(`Delete room "${room.number}"? This cannot be undone.`)) return
+
+    router.delete(route('manager.rooms.destroy', room.id), {
+        preserveState: true,
+        onError: (errors) => alert(Object.values(errors).join('\n')),
+    })
+}
 </script>
 
 <template>
-    <Head title="Available Rooms" />
-
-    <AppLayout>
-        <div class="px-4 py-6">
-            <Heading title="Available Rooms" description="Browse and book our luxury rooms." />
-
-            <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <Card v-for="room in rooms" :key="room.id" class="flex flex-col">
-                    <CardHeader>
-                        <CardTitle>Room #{{ room.number }}</CardTitle>
-                        <CardDescription v-if="room.floor">Located on Floor {{ room.floor.number }}</CardDescription>
-                    </CardHeader>
-                    <CardContent class="flex-grow">
-                        <div class="space-y-2">
-                            <p class="text-sm text-muted-foreground">Capacity: {{ room.capacity }} people</p>
-                            <p class="text-2xl font-bold">{{ formatPrice(room.price_cents) }} / night</p>
-                        </div>
-                    </CardContent>
-                    <CardFooter>
-                        <Button as-child class="w-full">
-                            <Link :href="route('reservations.create', room.id)">Book Now</Link>
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </div>
-
-            <div v-if="rooms.length === 0" class="mt-8 text-center">
-                <p class="text-muted-foreground">No rooms available at the moment. Please check back later.</p>
-            </div>
+    <div class="p-6 space-y-4">
+        <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-semibold">Manage Rooms</h1>
+            <Link :href="route('manager.rooms.create')">
+                <Button>Add Room</Button>
+            </Link>
         </div>
-    </AppLayout>
+
+        <DataTable
+            :columns="columns"
+            :paginatedData="rooms"
+            routeName="manager.rooms.index"
+            :filters="filters"
+            searchPlaceholder="Search by room number, floor, or capacity..."
+        />
+    </div>
 </template>

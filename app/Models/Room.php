@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Database\Factories\RoomFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,5 +41,10 @@ class Room extends Model
     public function scopeAvailable($query)
     {
         return $query->whereDoesntHave('reservations');
+    }
+
+    public function isReserved(): bool
+    {
+        return $this->reservations()->exists();
     }
 }

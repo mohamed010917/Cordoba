@@ -19,7 +19,7 @@ Route::inertia('/', 'Welcome', [
 Route::middleware(['auth', 'verified', User::class])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
-    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::get('/rooms', [RoomController::class, 'publicIndex'])->name('rooms.index');
     Route::get('/rooms/{room}/reserve', [ReservationController::class, 'create'])->name('reservations.create');
     Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
     Route::get('/my-reservations', [ReservationController::class, 'index'])->name('reservations.index');
@@ -31,6 +31,7 @@ Route::middleware(['auth', Manger::class, 'verified'])->prefix('manager')
     ->group(function () {
         Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
         Route::resource('floors', FloorController::class)->except(['show']);
+        Route::resource('rooms', RoomController::class)->except(['show']);
     });
 
 Route::middleware(['auth', Receptionist::class, 'verified'])->prefix('receptionist')
