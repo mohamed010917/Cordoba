@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
 import { Head, useForm, usePage } from '@inertiajs/vue3'
+import { ref, nextTick } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 const page = usePage()
@@ -43,6 +43,7 @@ const submit = () => {
 
 const handleFile = (e: Event) => {
     const file = (e.target as HTMLInputElement).files?.[0]
+
     if (file) {
         form.image = file
         imagePreview.value = URL.createObjectURL(file)

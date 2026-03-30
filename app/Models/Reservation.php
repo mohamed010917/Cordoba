@@ -10,8 +10,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Reservation extends Model
 {
-    /** @use HasFactory<ReservationFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'client_id',
+        'room_id',
+        'accompany_number',
+        'paid_price_cents',
+        'receptionist_id',
+    ];
 
     public function client(): BelongsTo
     {

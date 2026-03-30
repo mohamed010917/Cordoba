@@ -2,6 +2,7 @@
 import {  Link, usePage } from '@inertiajs/vue3';
 import {  LayoutGrid, User2Icon } from 'lucide-vue-next';
 
+import { computed } from 'vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -12,7 +13,6 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
-import { computed } from 'vue';
 
 const page = usePage() ;
 
@@ -62,10 +62,18 @@ const receptionist: NavItem[] = [
 ];
 
 const items = computed(() => {
-    if (role === 'admin') return admin
-    if (role === 'manager') return manger
+    if (role === 'admin') {
+return admin
+}
+
+    if (role === 'manager') {
+return manger
+}
    
-    if (role === 'receptionist') return receptionist
+    if (role === 'receptionist') {
+return receptionist
+}
+
     return user
 })
 </script>

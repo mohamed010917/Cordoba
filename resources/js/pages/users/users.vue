@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { BreadcrumbItem } from '@/types'
+import type { BreadcrumbItem } from '@/types'
 
 // ── Custom v-click-outside directive ──
 const vClickOutside = {
@@ -42,18 +42,34 @@ const clearFilters = () => {
 
 const applyFilters = () => {
     const query: Record<string, string> = {}
-    if (filters.value.search) query.search = filters.value.search
-    if (filters.value.ban)    query.ban    = filters.value.ban
-    if (filters.value.active) query.active = filters.value.active
+
+    if (filters.value.search) {
+query.search = filters.value.search
+}
+
+    if (filters.value.ban)    {
+query.ban    = filters.value.ban
+}
+
+    if (filters.value.active) {
+query.active = filters.value.active
+}
+
     router.get('/admin/users', query, { preserveState: true, replace: true })
 }
 
 const toggleMenu = (user: any) => {
-    page.props.users.data.forEach((u: any) => { if (u.id !== user.id) u.open = false })
+    page.props.users.data.forEach((u: any) => {
+ if (u.id !== user.id) {
+u.open = false
+} 
+})
     user.open = !user.open
 }
 
-const closeMenu = (user: any) => { user.open = false }
+const closeMenu = (user: any) => {
+ user.open = false 
+}
 
 const toggleBan = (user: any) => {
     router.post(`/admin/users/${user.id}/toggle-ban`, {}, {
@@ -63,7 +79,10 @@ const toggleBan = (user: any) => {
 }
 
 const deleteUser = (user: any) => {
-    if (!confirm(`Delete ${user.name}? This cannot be undone.`)) return
+    if (!confirm(`Delete ${user.name}? This cannot be undone.`)) {
+return
+}
+
     router.post(`/admin/users/${user.id}`, { _method: 'delete' }, {
         onSuccess: () => console.log('Deleted'),
         onError:   (e) => console.error(e),

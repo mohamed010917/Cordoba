@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Models\Room;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorereservationRequest extends FormRequest
@@ -12,18 +12,28 @@ class StorereservationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            //
+            'room_id' => 'required|exists:rooms,id',
+            'accompany_number' => [
+                'required',
+                'integer',
+                'min:0',
+                function ($attribute, $value, $fail) {
+                    $room = Room::find($this->room_id);
+                    if ($room && $value > $room->capacity) {
+                        $fail("The number of accompanies cannot exceed the room's capacity ({$room->capacity}).");
+                    }
+                },
+            ],
+            'stripe_token' => 'required|string',
         ];
     }
 }

@@ -1,13 +1,15 @@
 <script setup lang="ts" generic="TData, TValue">
-import { FlexRender, type ColumnDef } from '@tanstack/vue-table'
+import { FlexRender  } from '@tanstack/vue-table'
+import type {ColumnDef} from '@tanstack/vue-table';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-vue-next'
+import { useDataTable  } from '@/components/composables/useDataTable'
+import type {PaginatedData} from '@/components/composables/useDataTable';
+import DataTablePagination from '@/components/shared/DataTablePagination.vue'
+import DataTableToolbar from '@/components/shared/DataTableToolbar.vue'
 import {
   Table, TableBody, TableCell,
   TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
-import DataTableToolbar from '@/components/shared/DataTableToolbar.vue'
-import DataTablePagination from '@/components/shared/DataTablePagination.vue'
-import { useDataTable, type PaginatedData } from '@/components/composables/useDataTable'
 
 const props = withDefaults(
   defineProps<{
@@ -33,7 +35,10 @@ const { table, search, sortBy, sortDir, perPage } = useDataTable({
 })
 
 function sortIcon(colId: string) {
-  if (sortBy.value !== colId) return ChevronsUpDown
+  if (sortBy.value !== colId) {
+return ChevronsUpDown
+}
+
   return sortDir.value === 'asc' ? ChevronUp : ChevronDown
 }
 </script>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import { usePage } from '@inertiajs/vue3'
 
 const page = usePage()
 
@@ -23,6 +23,7 @@ watch(
         if (flash.success) {
             showToast(flash.success, 'success')
         }
+
         if (flash.error) {
             showToast(flash.error, 'error')
         }
