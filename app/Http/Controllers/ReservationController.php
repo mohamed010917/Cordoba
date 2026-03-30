@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\Reservation;
 use App\Models\Room;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,8 +18,10 @@ class ReservationController extends Controller
 {
     public function index(): Response
     {
+        $authenticatedUser = Auth::user();
+
         $reservations = Reservation::with('room')
-            ->where('client_id', auth()->id())
+            ->where('client_id', $authenticatedUser->id)
             ->latest()
             ->get();
 
@@ -36,6 +39,8 @@ class ReservationController extends Controller
 
     public function store(StorereservationRequest $request): RedirectResponse
     {
+        $authenticatedUser = Auth::user();
+
         DB::beginTransaction();
 
         try {
@@ -61,7 +66,7 @@ class ReservationController extends Controller
             ]);
 
             $reservation = Reservation::create([
-                'client_id' => auth()->id(),
+                'client_id' => $authenticatedUser->id,
                 'room_id' => $room->id,
                 'accompany_number' => $request->accompany_number,
                 'paid_price_cents' => $room->price_cents,
@@ -87,7 +92,9 @@ class ReservationController extends Controller
 
     public function destroy(Reservation $reservation): RedirectResponse
     {
-        if ($reservation->client_id !== auth()->id()) {
+        $authenticatedUser = Auth::user();
+
+        if ($reservation->client_id !== $authenticatedUser->id) {
             abort(403);
         }
 
