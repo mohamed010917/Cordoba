@@ -9,9 +9,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
-    /** @use HasFactory<PaymentFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'reservation_id',
+        'amount_cents',
+        'payment_method',
+        'status',
+        'transaction_id',
+    ];
     public function reservation(): BelongsTo
     {
         return $this->belongsTo(Reservation::class);
