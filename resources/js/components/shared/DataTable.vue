@@ -11,7 +11,7 @@ import { useDataTable, type PaginatedData } from '@/components/composables/useDa
 
 const props = withDefaults(
   defineProps<{
-    columns: ColumnDef<TData, TValue>[]
+    columns: ColumnDef<TData, any>[]
     paginatedData: PaginatedData<TData>
     routeName: string
     filters?: Record<string, string>

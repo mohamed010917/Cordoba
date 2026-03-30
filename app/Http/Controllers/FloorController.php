@@ -2,65 +2,95 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StorefloorRequest;
-use App\Http\Requests\UpdatefloorRequest;
-use App\Models\floor;
+use App\Http\Requests\StoreFloorRequest;
+use App\Http\Requests\UpdateFloorRequest;
+use App\Models\Floor;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class FloorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request): Response
     {
-        //
+        $this->authorize('viewAny', Floor::class);
+
+        $query = Floor::with('manager:id,name')
+            ->orderBy(
+                $request->input('sort_by', 'created_at'),
+                $request->input('sort_dir', 'desc')
+            );
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('number', 'like', "%{$search}%");
+            });
+        }
+
+        $floors = $query->paginate($request->input('per_page', 10))
+            ->withQueryString();
+
+        return Inertia::render('Floors/Index', [
+            'floors'  => $floors,
+            'isAdmin' => auth()->user()->hasRole('admin'),
+            'filters' => $request->only(['search', 'sort_by', 'sort_dir']),
+            'url'     => route('manager.floors.index'),
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): Response
     {
-        //
+        $this->authorize('create', Floor::class);
+
+        return Inertia::render('Floors/Create', [
+            'nextNumber' => Floor::generateNumber(),
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StorefloorRequest $request)
+    public function store(StoreFloorRequest $request): RedirectResponse
     {
-        //
+        Floor::create([
+            'name'      => $request->name,
+            'number'    => Floor::generateNumber(),
+            'manger_id' => auth()->id(),
+        ]);
+
+        return redirect()->route('manager.floors.index')
+            ->with('success', 'Floor created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(floor $floor)
+    public function edit(Floor $floor): Response
     {
-        //
+        $this->authorize('update', $floor);
+
+        return Inertia::render('Floors/Edit', [
+            'floor' => $floor,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(floor $floor)
+    public function update(UpdateFloorRequest $request, Floor $floor): RedirectResponse
     {
-        //
+        $floor->update(['name' => $request->name]);
+
+        return redirect()->route('manager.floors.index')
+            ->with('success', 'Floor updated successfully.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdatefloorRequest $request, floor $floor)
+    public function destroy(Floor $floor): JsonResponse
     {
-        //
-    }
+        $this->authorize('delete', $floor);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(floor $floor)
-    {
-        //
+        if ($floor->hasRooms()) {
+            return response()->json([
+                'message' => 'Cannot delete floor: it has rooms associated with it.',
+            ], 422);
+        }
+
+        $floor->delete();
+
+        return response()->json(['message' => 'Floor deleted successfully.']);
     }
 }

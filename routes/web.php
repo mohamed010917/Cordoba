@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FloorController;
 use App\Http\Controllers\admin\MangerController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Middleware\Admin;
@@ -22,6 +23,7 @@ Route::middleware(['auth', 'verified', Manger::class])
     ->name('manager.')
     ->group(function (): void {
         Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+        Route::resource('floors', FloorController::class)->except(['show']);
     });
 
 Route::middleware(['auth', 'verified', Receptionist::class])
