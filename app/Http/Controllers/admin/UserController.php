@@ -171,6 +171,10 @@ class UserController extends Controller
     public function approve(User $user): RedirectResponse
     {
         if (Auth::user()->can('edit users')) {
+            if ($user->is_approved) {
+                return redirect()->back()->with('success', 'User is already approved.');
+            }
+
             $user->is_approved = true;
             $user->approved_by = Auth::id();
             $user->approved_at = now();

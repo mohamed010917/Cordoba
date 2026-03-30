@@ -46,4 +46,32 @@ class ApproveUserTest extends TestCase
 
         Notification::assertSentTo($client, ClientApprovedNotification::class);
     }
+
+    public function test_admin_approval_does_not_send_duplicate_notifications_for_approved_users(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create([
+            'name' => 'Admin User',
+            'role' => 'admin',
+        ]);
+
+        $client = User::factory()->create([
+            'role' => 'user',
+            'is_approved' => true,
+            'approved_at' => now()->subMinute(),
+            'approved_by' => $admin->id,
+        ]);
+
+        $permission = Permission::findOrCreate('edit users', 'web');
+        $admin->givePermissionTo($permission);
+
+        $response = $this
+            ->actingAs($admin)
+            ->post(route('admin.users.approve', $client));
+
+        $response->assertRedirect();
+
+        Notification::assertNothingSent();
+    }
 }
