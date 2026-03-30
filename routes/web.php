@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Controllers\FloorController;
 use App\Http\Controllers\admin\MangerController;
 use App\Http\Controllers\admin\UserController;
+use App\Http\Controllers\FloorController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\RoomController;
 use App\Http\Middleware\Admin;
 use App\Http\Middleware\Manger;
-use App\Http\Middleware\receptionist;
+use App\Http\Middleware\Receptionist;
 use App\Http\Middleware\User;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -15,19 +15,16 @@ use Laravel\Fortify\Features;
 Route::inertia('/', 'Welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
-// user routes
+
 Route::middleware(['auth', 'verified', User::class])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
-    // Rooms & Reservations
     Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
     Route::get('/rooms/{room}/reserve', [ReservationController::class, 'create'])->name('reservations.create');
     Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
     Route::get('/my-reservations', [ReservationController::class, 'index'])->name('reservations.index');
     Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
 });
-
-// manger routes
 
 Route::middleware(['auth', Manger::class, 'verified'])->prefix('manager')
     ->name('manager.')
@@ -36,14 +33,12 @@ Route::middleware(['auth', Manger::class, 'verified'])->prefix('manager')
         Route::resource('floors', FloorController::class)->except(['show']);
     });
 
-// receptionist
-Route::middleware(['auth', receptionist::class, 'verified'])->prefix('receptionist')
+Route::middleware(['auth', Receptionist::class, 'verified'])->prefix('receptionist')
     ->name('receptionist.')
     ->group(function () {
         Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
     });
 
-// admin routes
 Route::middleware(['auth', Admin::class, 'verified'])->prefix('admin')
     ->name('admin.')
     ->group(function () {
