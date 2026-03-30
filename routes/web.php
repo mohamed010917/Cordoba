@@ -56,18 +56,7 @@ Route::middleware(['auth', receptionist::class , 'verified'])->prefix('reception
     Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
 }) ; 
 
-// admin routes
-Route::middleware(['auth', Admin::class , 'verified'])->prefix('admin')
-->name('admin.')
-->group(function () {
-    Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
-    Route::resource('users', UserController::class);
-    Route::post("users/{user}/toggle-ban" , [UserController::class , "toggleBan"])->name("users.toggle-ban") ;
-    Route::post("users/{user}/toggle-active" , [UserController::class , "toggleActive"])->name("users.toggle-active") ;
-    Route::post("users/{user}/toggle-role" , [UserController::class , "changRole"])->name("users.toggle-role") ;
-    Route::post("users/{user}/approve" , [UserController::class , "approve"])->name("users.approve") ;
-    Route::resource("managers" , MangerController::class) ;
-}) ;
+
 
 
 Route::middleware(['auth', Admin::class, 'verified'])->prefix('admin')

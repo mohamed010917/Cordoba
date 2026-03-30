@@ -44,6 +44,7 @@ class UserController extends Controller
         if (! $user instanceof User) {
             return redirect()->back()->with('error', 'An error occurred while creating the user');
         }
+
         return redirect()->route('admin.users.index');
 
     }
@@ -83,10 +84,12 @@ class UserController extends Controller
                 'country_id' => $request->country_id,
             ]);
 
+
             $user->syncRoles($request->role) ;
             return redirect()->route('admin.users.index')->with("success" , "User updated successfully");
         }catch(\Exception $e){
             return redirect()->back()->with("error" , "An error occurred while updating the user");
+
 
         }
     }
@@ -128,6 +131,7 @@ class UserController extends Controller
             return redirect()
                ->back()->with("success" , "User ban status toggled successfully")
               ->with("user", $user);
+
 
         }
 
@@ -189,7 +193,9 @@ class UserController extends Controller
 
             $user->notify(new ClientApprovedNotification(Auth::user()->name));
 
-            return redirect()->back()->with('success', 'User approved successfully')->with("user", $user) ;
+
+            return redirect()->back()->with('success', 'User approved successfully');
+
         }
   
 
