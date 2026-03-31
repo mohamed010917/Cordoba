@@ -16,7 +16,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
-     
         $admin = Role::create(['name' => 'admin']);
         $manager = Role::create(['name' => 'manager']);
         $client = Role::create(['name' => 'user']);
@@ -64,7 +63,9 @@ class DatabaseSeeder extends Seeder
         $receptionist->assignRole("receptionist");
 
 
-        User::factory(30)->create();
+        User::factory(30)->create()->each(function ($user) {
+            $user->assignRole("user");
+        });
         $this->call([
             CountrieSeeder::class,
             FloorSeeder::class,

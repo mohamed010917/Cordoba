@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use Illuminate\Support\Facades\Hash;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
@@ -14,22 +15,34 @@ class CreateNewUser implements CreatesNewUsers
     use PasswordValidationRules;
     use ProfileValidationRules;
 
-    /**
-     * Validate and create a newly registered user.
-     *
-     * @param  array<string, string>  $input
-     */
     public function create(array $input): User
     {
         Validator::make($input, [
-            ...$this->profileRules(),
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => $this->passwordRules(),
+            'phone' => ['nullable', 'string', 'max:30'],
+            'national_id' => ['nullable', 'string', 'max:255'],
+            'gender' => ['required', 'in:male,female'],
+            'country_id' => ['required', 'exists:countries,id'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ])->validate();
+
+        $imagePath = null;
+
+        if (!empty($input['image'])) {
+            $imagePath = $input['image']->store('users', 'public');
+        }
 
         $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
-            'password' => $input['password'],
+            'password' => Hash::make($input['password']),
+            'phone' => $input['phone'] ?? null,
+            'national_id' => $input['national_id'] ?? null,
+            'gender' => $input['gender'] ?? null,
+            'country_id' => $input['country_id'] ?? null,
+            'image' => $imagePath,
             'role' => 'user',
         ]);
 

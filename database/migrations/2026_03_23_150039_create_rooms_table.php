@@ -18,7 +18,6 @@ return new class extends Migration
             $table->bigInteger("price_cents");
             $table->foreignId("floor_id")->constrained()->onDelete("cascade");
             $table->foreignId("manager_id")->nullable()->constrained("users")->onDelete("set null");
-
             $table->timestamps();
         });
     }

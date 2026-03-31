@@ -1,6 +1,6 @@
 <?php
-
 use App\Http\Controllers\admin\MangerController;
+use App\Http\Controllers\Manager\ReceptionistController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\ReservationController;
@@ -11,6 +11,10 @@ use App\Http\Middleware\Receptionist;
 use App\Http\Middleware\User;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
+use App\Http\Controllers\Receptionist\PendingClientController;
+use App\Http\Controllers\Receptionist\ApprovedClientController;
+use App\Http\Controllers\Receptionist\ClientReservationController;
+use App\Http\Controllers\Manager\ClientController;
 
 Route::inertia('/', 'Welcome', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -36,13 +40,46 @@ Route::middleware(['auth', Manger::class, 'verified'])->prefix('manager')
 
 
 
+// manager routes
+Route::middleware(['auth', 'verified', Manger::class])
+    ->prefix('manager')
+    ->name('manager.')
+    ->group(function () {
+        Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+
+       
+    Route::get('/receptionists', [ReceptionistController::class, 'index'])->name('receptionists.index');
+    Route::get('/receptionists/create', [ReceptionistController::class, 'create'])->name('receptionists.create');
+    Route::post('/receptionists', [ReceptionistController::class, 'store'])->name('receptionists.store');
+    Route::get('/receptionists/{receptionist}/edit', [ReceptionistController::class, 'edit'])->name('receptionists.edit');
+    Route::put('/receptionists/{receptionist}', [ReceptionistController::class, 'update'])->name('receptionists.update');
+    Route::delete('/receptionists/{receptionist}', [ReceptionistController::class, 'destroy'])->name('receptionists.destroy');
+    Route::patch('/receptionists/{receptionist}/ban', [ReceptionistController::class, 'ban'])->name('receptionists.ban');
+    Route::patch('/receptionists/{receptionist}/unban', [ReceptionistController::class, 'unban'])->name('receptionists.unban');
+
+    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
+    Route::get('/clients/create', [ClientController::class, 'create'])->name('clients.create');
+    Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
+    Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit');
+    Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
+    Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
+    Route::patch('/clients/{client}/approve', [ClientController::class, 'approve'])->name('clients.approve');
+    });
 
 // receptionist
-Route::middleware(['auth', receptionist::class , 'verified'])->prefix('receptionist')
-->name('receptionist.')
-->group(function (){
-    Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
-}) ; 
+Route::middleware(['auth', 'verified', receptionist::class])
+    ->prefix('receptionist')
+    ->name('receptionist.')
+    ->group(function () {
+        Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+
+        Route::get('/clients/pending', [PendingClientController::class, 'index'])->name('clients.pending');
+        Route::patch('/clients/{client}/approve', [PendingClientController::class, 'approve'])->name('clients.approve');
+
+        Route::get('/clients/approved', [ApprovedClientController::class, 'index'])->name('clients.approved');
+
+        Route::get('/clients/reservations', [ClientReservationController::class, 'index'])->name('clients.reservations');
+    });
 
 
 

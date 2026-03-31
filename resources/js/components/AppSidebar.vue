@@ -3,6 +3,9 @@ import {  Link, usePage } from '@inertiajs/vue3';
 import {  BookAIcon, Flower2Icon, LayoutGrid, Magnet, User2Icon } from 'lucide-vue-next';
 
 import { computed } from 'vue';
+import {  Users } from 'lucide-vue-next';
+import { route } from 'ziggy-js';
+
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -38,7 +41,7 @@ const admin: NavItem[] = [
 ];
 
 
-const manger: NavItem[] = [
+const manager: NavItem[] = [
     {
         title: 'Dashboard',
         href: "/manager/dashboard",
@@ -54,7 +57,19 @@ const manger: NavItem[] = [
         href: "/manager/rooms",
         icon: Magnet,
     },
+    {
+        title: 'Receptionists',
+        href: '/manager/receptionists',
+        icon: Users,
+    },
+    {
+        title: 'Clients',
+        href: '/manager/clients',
+        icon: Users,
+
+    },
 ];
+
 const user: NavItem[] = [
     {
         title: 'Dashboard',
@@ -76,19 +91,38 @@ const user: NavItem[] = [
 const receptionist: NavItem[] = [
     {
         title: 'Dashboard',
-        href: "/receptionist/dashboard",
+        href: '/receptionist/dashboard',
         icon: LayoutGrid,
     },
+    {
+        title: 'Pending Clients',
+        href: '/receptionist/clients/pending',
+        icon: Users,
+    },
+    {
+        title: 'My Approved Clients',
+        href: '/receptionist/clients/approved',
+        icon: Users,
+    },
+    {
+        title: 'Clients Reservations',
+        href: '/receptionist/clients/reservations',
+        icon: Users,
+    },
 ];
-
 const items = computed(() => {
+
     if (role === 'admin') {
 return admin
 }
 
     if (role === 'manager') {
-return manger
+return manager
 }
+
+    if (role === 'admin') return admin
+    if (role === 'manager') return manager
+
    
     if (role === 'receptionist') {
 return receptionist
