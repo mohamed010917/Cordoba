@@ -35,14 +35,12 @@ class ClientApprovedNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('Your client account has been approved')
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line('Your hotel system client account has been approved.')
-            ->when(
-                $this->approvedByName !== null,
-                fn (MailMessage $message) => $message->line('Approved by: '.$this->approvedByName.'.'),
-            )
-            ->action('Sign in to your account', route('login'))
-            ->line('You can now sign in and access your account.');
+            ->theme('hotel')
+            ->markdown('emails.client-approved', [
+                'clientName' => $notifiable->name,
+                'approvedByName' => $this->approvedByName,
+                'loginUrl' => route('login'),
+            ]);
     }
 
     /**

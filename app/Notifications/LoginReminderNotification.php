@@ -35,11 +35,12 @@ class LoginReminderNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('We miss you at Simple Hotel System')
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line('It looks like you have not logged in to your client account for '.$this->inactiveDays.' days.')
-            ->line('Sign in to review your reservations, account details, and the latest updates from the hotel team.')
-            ->action('Sign in to your account', route('login'))
-            ->line('If you no longer need access, you can safely ignore this reminder.');
+            ->theme('hotel')
+            ->markdown('emails.login-reminder', [
+                'clientName' => $notifiable->name,
+                'inactiveDays' => $this->inactiveDays,
+                'loginUrl' => route('login'),
+            ]);
     }
 
     /**

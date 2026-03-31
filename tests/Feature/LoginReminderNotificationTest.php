@@ -3,20 +3,17 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Notifications\ClientApprovedNotification;
+use App\Notifications\LoginReminderNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
-class ClientApprovedNotificationTest extends TestCase
+class LoginReminderNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Test that the notification can be sent to an approved client.
-     */
-    public function test_it_can_be_sent_to_a_client(): void
+    public function test_it_can_be_sent_to_an_inactive_client(): void
     {
         Notification::fake();
 
@@ -24,9 +21,9 @@ class ClientApprovedNotificationTest extends TestCase
             'role' => 'user',
         ]);
 
-        $client->notify(new ClientApprovedNotification('Front Desk Admin'));
+        $client->notify(new LoginReminderNotification(30));
 
-        Notification::assertSentTo($client, ClientApprovedNotification::class);
+        Notification::assertSentTo($client, LoginReminderNotification::class);
     }
 
     public function test_it_is_queued_and_uses_the_mail_channel(): void
@@ -35,10 +32,11 @@ class ClientApprovedNotificationTest extends TestCase
             'role' => 'user',
         ]);
 
-        $notification = new ClientApprovedNotification('Front Desk Admin');
+        $notification = new LoginReminderNotification(30);
 
         $this->assertInstanceOf(ShouldQueue::class, $notification);
         $this->assertSame(['mail'], $notification->via($client));
+        $this->assertSame(['inactive_days' => 30], $notification->toArray($client));
     }
 
     public function test_it_builds_the_expected_mail_message(): void
@@ -48,14 +46,14 @@ class ClientApprovedNotificationTest extends TestCase
             'role' => 'user',
         ]);
 
-        $notification = new ClientApprovedNotification('Front Desk Admin');
+        $notification = new LoginReminderNotification(30);
         $mailMessage = $notification->toMail($client);
 
-        $this->assertSame('Your client account has been approved', $mailMessage->subject);
+        $this->assertSame('We miss you at Simple Hotel System', $mailMessage->subject);
         $this->assertSame('hotel', $mailMessage->theme);
-        $this->assertSame('emails.client-approved', $mailMessage->markdown);
+        $this->assertSame('emails.login-reminder', $mailMessage->markdown);
         $this->assertSame('Jane Client', $mailMessage->viewData['clientName']);
-        $this->assertSame('Front Desk Admin', $mailMessage->viewData['approvedByName']);
+        $this->assertSame(30, $mailMessage->viewData['inactiveDays']);
         $this->assertSame(route('login'), $mailMessage->viewData['loginUrl']);
     }
 
@@ -66,13 +64,13 @@ class ClientApprovedNotificationTest extends TestCase
             'role' => 'user',
         ]);
 
-        $notification = new ClientApprovedNotification('Front Desk Admin');
+        $notification = new LoginReminderNotification(30);
         $renderedMail = $notification->toMail($client)->render()->toHtml();
 
-        $this->assertStringContainsString('Welcome, Jane Client', $renderedMail);
+        $this->assertStringContainsString('We miss you, Jane Client', $renderedMail);
         $this->assertStringContainsString('Simple Hotel System', $renderedMail);
         $this->assertStringContainsString('Guest Services Desk', $renderedMail);
-        $this->assertStringContainsString('#8a5a2b', $renderedMail);
-        $this->assertStringContainsString('Sign in to your account', $renderedMail);
+        $this->assertStringContainsString('30 days', $renderedMail);
+        $this->assertStringContainsString('Return to your account', $renderedMail);
     }
 }
