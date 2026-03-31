@@ -1,53 +1,50 @@
 <script setup lang="ts">
 import { Head, usePage, router } from '@inertiajs/vue3'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 const page = usePage()
-const user = page.props.user
+
+// ✅ Reactive reference to user data
+const user = computed(() => page.props.user)
+
+// ✅ Separate watch for redirect logic
+watch(() => page.props.user, (u) => {
+    if (!u) router.back()
+}, { immediate: true })
 
 const loading = ref<string | null>(null)
 
 const approveUser = () => {
     loading.value = 'approve'
-    router.post(`/admin/users/${user.id}/approve`, {}, { onFinish: () => loading.value = null })
+    router.post(`/admin/users/${user.value.id}/approve`, {}, { onFinish: () => loading.value = null })
 }
 const banUser = () => {
     loading.value = 'ban'
-    router.post(`/admin/users/${user.id}/ban`, {}, { onFinish: () => loading.value = null })
+    router.post(`/admin/users/${user.value.id}/toggle-ban`, {}, { onFinish: () => loading.value = null })
 }
 const activateUser = () => {
     loading.value = 'activate'
-    router.post(`/admin/users/${user.id}/activate`, {}, { onFinish: () => loading.value = null })
+    router.post(`/admin/users/${user.value.id}/toggle-active`, {}, { onFinish: () => loading.value = null })
 }
 const deleteUser = () => {
-    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+   
         loading.value = 'delete'
-        router.delete(`/admin/users/${user.id}`, { onFinish: () => loading.value = null })
-    }
+        router.delete(`/admin/users/${user.value.id}`, { onFinish: () => loading.value = null })
+    
 }
 
 const statusConfig = computed(() => {
-    if (user.banned_at) {
-return { label: 'Banned', class: 'status-banned', dot: '#ef4444' }
-}
-
-    if (user.is_active && user.approved_at) {
-return { label: 'Active', class: 'status-active', dot: '#22c55e' }
-}
-
-    if (!user.approved_at) {
-return { label: 'Pending', class: 'status-pending', dot: '#f59e0b' }
-}
-
+    if (user.value.banned_at) return { label: 'Banned', class: 'status-banned', dot: '#ef4444' }
+    if (user.value.is_active && user.value.is_approved) return { label: 'Active', class: 'status-active', dot: '#22c55e' }
+    if (!user.value.is_approved) return { label: 'Pending', class: 'status-pending', dot: '#f59e0b' }
     return { label: 'Inactive', class: 'status-inactive', dot: '#6b7280' }
 })
 
 const initials = computed(() => {
-    return user.name?.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase() || '?'
+    return user.value.name?.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase() || '?'
 })
 </script>
-
 <template>
     <Head title="User Details" />
     <AppLayout>
@@ -92,7 +89,7 @@ const initials = computed(() => {
                                 <span class="ud-badge__dot"></span>
                                 {{ statusConfig.label }}
                             </span>
-                            <span v-if="user.approved_at" class="ud-badge ud-badge--approved">
+                            <span v-if="user.is_approved" class="ud-badge ud-badge--approved">
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
                                 Approved
                             </span>

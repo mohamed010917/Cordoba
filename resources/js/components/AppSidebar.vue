@@ -38,6 +38,21 @@ const admin: NavItem[] = [
         href: '/admin/managers',
         icon: User2Icon,
     },
+    {
+        title: 'floors',
+        href:"/admin/floors",
+        icon: Flower2Icon,
+    },
+       {
+        title: 'rooms',
+        href: "/admin/rooms",
+        icon: Magnet,
+    },
+    {
+        title: 'Receptionists',
+        href: '/admin/receptionists',
+        icon: Users,
+    },
 ];
 
 

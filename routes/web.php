@@ -94,6 +94,16 @@ Route::middleware(['auth', Admin::class, 'verified'])->prefix('admin')
         Route::post('users/{user}/toggle-role', [UserController::class, 'changRole'])->name('users.toggle-role');
         Route::post('users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
         Route::resource('managers', MangerController::class);
+        Route::resource('floors', FloorController::class)->except(['show']);
+        Route::resource('rooms', RoomController::class)->except(['show']);
+        Route::get('/receptionists', [ReceptionistController::class, 'index'])->name('receptionists.index');
+        Route::get('/receptionists/create', [ReceptionistController::class, 'create'])->name('receptionists.create');
+        Route::post('/receptionists', [ReceptionistController::class, 'store'])->name('receptionists.store');
+        Route::get('/receptionists/{receptionist}/edit', [ReceptionistController::class, 'edit'])->name('receptionists.edit');
+        Route::put('/receptionists/{receptionist}', [ReceptionistController::class, 'update'])->name('receptionists.update');
+        Route::delete('/receptionists/{receptionist}', [ReceptionistController::class, 'destroy'])->name('receptionists.destroy');
+        Route::patch('/receptionists/{receptionist}/ban', [ReceptionistController::class, 'ban'])->name('receptionists.ban');
+        Route::patch('/receptionists/{receptionist}/unban', [ReceptionistController::class, 'unban'])->name('receptionists.unban');
     });
 
 require __DIR__.'/settings.php';

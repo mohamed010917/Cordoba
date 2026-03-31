@@ -11,6 +11,9 @@ class Manger
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if(Auth::check() && Auth::user()->hasRole('admin')) {
+            return $next($request);
+        }
         if (! Auth::check() || Auth::user()->role !== 'manager' || ! Auth::user()->hasRole('manager')) {
             abort(403, 'Unauthorized');
         }

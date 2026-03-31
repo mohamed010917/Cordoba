@@ -90,6 +90,9 @@ class FloorController extends Controller
         }
 
         $floor->delete();
+        if (!auth('api')->check()) {
+          return redirect()->back()->with('success', 'Floor deleted successfully.'); 
+        }
 
         return response()->json(['message' => 'Floor deleted successfully.']);
     }
