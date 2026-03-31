@@ -88,7 +88,7 @@ Route::middleware(['auth', 'verified', Receptionist::class])
 Route::middleware(['auth', Admin::class, 'verified'])->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+        Route::get('/dashboard',  [StatisticsController::class, 'index'])->name('dashboard');
         Route::resource('users', UserController::class);
         Route::post('users/{user}/toggle-ban', [UserController::class, 'toggleBan'])->name('users.toggle-ban');
         Route::post('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');

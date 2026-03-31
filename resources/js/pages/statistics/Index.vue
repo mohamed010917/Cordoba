@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
+import { dashboard } from '@/routes'
+import { BreadcrumbItem } from '@/types'
 import { Head, usePage } from '@inertiajs/vue3'
 import Chart from 'chart.js/auto'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
@@ -190,11 +192,18 @@ onBeforeUnmount(() => {
     countriesChart?.destroy()
     topClientsChart?.destroy()
 })
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: dashboard(), 
+    },
+];
 </script>
 
 <template>
-    <AppLayout>
-        <Head title="Statistics" />
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <Head title="Admin Dashbord" />
 
         <div class="space-y-6 px-4 py-6 md:px-6">
             <h1 class="text-2xl font-semibold">Statistics</h1>

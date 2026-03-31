@@ -53,11 +53,7 @@ const admin: NavItem[] = [
         href: '/admin/receptionists',
         icon: Users,
     },
-    {
-        title: 'Statistics',
-        href: '/admin/statistics',
-        icon: ChartPie,
-    },
+  
 ];
 
 
