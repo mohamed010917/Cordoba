@@ -19,9 +19,12 @@ class AuthenticationTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_users_can_authenticate_using_the_login_screen()
+    public function test_approved_users_can_authenticate_using_the_login_screen()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'is_approved' => true,
+            'approved_at' => now(),
+        ]);
 
         $response = $this->post(route('login.store'), [
             'email' => $user->email,
@@ -32,10 +35,28 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
+    public function test_pending_clients_are_redirected_to_the_pending_approval_page_after_login(): void
+    {
+        $user = User::factory()->create([
+            'is_approved' => false,
+            'approved_at' => null,
+        ]);
+
+        $response = $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('pending-approval', absolute: false));
+    }
+
     public function test_successful_login_updates_the_last_login_timestamp(): void
     {
         $user = User::factory()->create([
             'last_login_at' => null,
+            'is_approved' => true,
+            'approved_at' => now(),
         ]);
 
         $this->post(route('login.store'), [
@@ -55,7 +76,10 @@ class AuthenticationTest extends TestCase
             'confirmPassword' => true,
         ]);
 
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'is_approved' => true,
+            'approved_at' => now(),
+        ]);
 
         $user->forceFill([
             'two_factor_secret' => encrypt('test-secret'),

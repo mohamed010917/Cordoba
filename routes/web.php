@@ -12,10 +12,13 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Middleware\Admin;
+use App\Http\Middleware\ApprovedClient;
 use App\Http\Middleware\Manger;
 use App\Http\Middleware\Receptionist;
 use App\Http\Middleware\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
 Route::inertia('/', 'Welcome', [
@@ -23,13 +26,29 @@ Route::inertia('/', 'Welcome', [
 ])->name('home');
 
 Route::middleware(['auth', 'verified', User::class])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', function (Request $request) {
+        if (! $request->user()->is_approved) {
+            return redirect()->route('pending-approval');
+        }
 
-    Route::get('/rooms', [RoomController::class, 'publicIndex'])->name('rooms.index');
-    Route::get('/rooms/{room}/reserve', [ReservationController::class, 'create'])->name('reservations.create');
-    Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
-    Route::get('/my-reservations', [ReservationController::class, 'index'])->name('reservations.index');
-    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+
+    Route::get('pending-approval', function (Request $request) {
+        if ($request->user()->is_approved) {
+            return redirect()->route('dashboard');
+        }
+
+        return Inertia::render('PendingApproval');
+    })->name('pending-approval');
+
+    Route::middleware(ApprovedClient::class)->group(function () {
+        Route::get('/rooms', [RoomController::class, 'publicIndex'])->name('rooms.index');
+        Route::get('/rooms/{room}/reserve', [ReservationController::class, 'create'])->name('reservations.create');
+        Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+        Route::get('/my-reservations', [ReservationController::class, 'index'])->name('reservations.index');
+        Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+    });
 });
 
 Route::middleware(['auth', Manger::class, 'verified'])->prefix('manager')
@@ -88,7 +107,7 @@ Route::middleware(['auth', 'verified', Receptionist::class])
 Route::middleware(['auth', Admin::class, 'verified'])->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/dashboard',  [StatisticsController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [StatisticsController::class, 'index'])->name('dashboard');
         Route::resource('users', UserController::class);
         Route::post('users/{user}/toggle-ban', [UserController::class, 'toggleBan'])->name('users.toggle-ban');
         Route::post('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');

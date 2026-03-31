@@ -20,6 +20,7 @@ import type { NavItem } from '@/types';
 const page = usePage() ;
 
 const role = page.props.auth.user.role ;
+const isApproved = Boolean(page.props.auth.user.is_approved);
 
 const admin: NavItem[] = [
     {
@@ -109,6 +110,14 @@ const user: NavItem[] = [
     }
 ];
 
+const pendingUser: NavItem[] = [
+    {
+        title: 'Pending Approval',
+        href: '/pending-approval',
+        icon: LayoutGrid,
+    },
+];
+
 const receptionist: NavItem[] = [
     {
         title: 'Dashboard',
@@ -148,6 +157,10 @@ return manager
     if (role === 'receptionist') {
 return receptionist
 }
+
+    if (role === 'user' && !isApproved) {
+        return pendingUser
+    }
 
     return user
 })

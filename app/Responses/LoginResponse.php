@@ -18,8 +18,12 @@ class LoginResponse implements LoginResponseContract
             return redirect()->route('manager.dashboard');
         }
 
-        if($user->role === 'receptionist'){
+        if ($user->role === 'receptionist') {
             return redirect()->route('receptionist.dashboard');
+        }
+
+        if (! $user->is_approved) {
+            return redirect()->route('pending-approval');
         }
 
         return redirect()->route('dashboard');
