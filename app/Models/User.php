@@ -13,11 +13,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Nnjeim\World\Models\City;
+use Nnjeim\World\Models\Country;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'image', 'role', 'is_active', 'is_banned', 'phone', 'national_id', 'created_by_manager_id', 'gender', 'is_approved', 'approved_at', 'approved_by', 'banned_at', 'banned_by', 'country_id','last_login_at'])]
+#[Fillable(['name', 'email', 'password', 'image', 'role', 'is_active', 'is_banned', 'phone', 'national_id', 'created_by_manager_id', 'gender', 'is_approved', 'approved_at', 'approved_by', 'banned_at', 'banned_by', 'country_id', 'city_id', 'last_login_at'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens;
@@ -42,13 +44,11 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
-            'approved_at' => 'datetime',
-            'banned_at' => 'datetime',
             'is_active' => 'boolean',
             'is_banned' => 'boolean',
         ];
     }
-// relations
+
     public function createdByManager()
     {
         return $this->belongsTo(User::class, 'created_by_manager_id');
@@ -66,12 +66,12 @@ class User extends Authenticatable
 
     public function country()
     {
-        return $this->belongsTo(\Nnjeim\World\Models\Country::class);
+        return $this->belongsTo(Country::class);
     }
 
     public function city()
     {
-        return $this->belongsTo(\Nnjeim\World\Models\City::class);
+        return $this->belongsTo(City::class);
     }
 
     public function createdReceptionists()
@@ -79,11 +79,13 @@ class User extends Authenticatable
         return $this->hasMany(User::class, 'created_by_manager_id');
     }
 
-    public function approvedClients(){
+    public function approvedClients()
+    {
         return $this->hasMany(User::class, 'approved_by');
     }
 
-    public function clientReservations(){
+    public function clientReservations()
+    {
         return $this->hasMany(Reservation::class, 'client_id');
     }
 
@@ -92,7 +94,6 @@ class User extends Authenticatable
         return $this->hasMany(Reservation::class, 'receptionist_id');
     }
 
-// roles checkers
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -113,10 +114,11 @@ class User extends Authenticatable
         return $this->role === 'user';
     }
 
-    public function isApproved()
+    public function isApproved(): bool
     {
         return $this->approved_at !== null;
     }
+
     public function isPending(): bool
     {
         return $this->approved_at === null;
@@ -132,7 +134,6 @@ class User extends Authenticatable
         return $this->is_active === true;
     }
 
-// scopes
     public function scopeReceptionists(Builder $query): Builder
     {
         return $query->where('role', 'receptionist');

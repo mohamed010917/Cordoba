@@ -7,9 +7,6 @@ use App\Actions\user\Index as IndexUsersAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateUser;
 use App\Http\Requests\userCreate;
-
-use Nnjeim\World\Models\Country;
-use Nnjeim\World\Models\City;
 use App\Models\User;
 use App\Notifications\ClientApprovedNotification;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
+use Nnjeim\World\Models\Country;
 
 class UserController extends Controller
 {
@@ -48,7 +46,6 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully');
-
     }
 
     public function show(User $user): Response
@@ -87,13 +84,11 @@ class UserController extends Controller
                 'city_id' => $request->city_id,
             ]);
 
+            $user->syncRoles($request->role);
 
-            $user->syncRoles($request->role) ;
-            return redirect()->route('admin.users.index')->with("success" , "User updated successfully");
-        }catch(\Exception $e){
-            return redirect()->back()->with("error" , "An error occurred while updating the user");
-
-
+            return redirect()->route('admin.users.index')->with('success', 'User updated successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'An error occurred while updating the user');
         }
     }
 
@@ -132,10 +127,8 @@ class UserController extends Controller
             $user->save();
 
             return redirect()
-               ->back()->with("success" , "User ban status toggled successfully")
-              ->with("user", $user);
-
-
+                ->back()->with('success', 'User ban status toggled successfully')
+                ->with('user', $user);
         }
 
         abort(403);
@@ -159,9 +152,8 @@ class UserController extends Controller
             return redirect()->back()->with('success', 'User role changed successfully');
         }
 
-        redirect()->back()->with("error" , "You dont have permission to change user role")
-        ->with("user", $user) ;
-
+        return redirect()->back()->with('error', 'You dont have permission to change user role')
+            ->with('user', $user);
     }
 
     public function toggleActive(User $user): RedirectResponse
@@ -174,9 +166,8 @@ class UserController extends Controller
             $user->is_active = ! $user->is_active;
             $user->save();
 
-            return redirect()->back()->with("success" , "User active status toggled successfully")
-            ->with("user", $user) ;
-
+            return redirect()->back()->with('success', 'User active status toggled successfully')
+                ->with('user', $user);
         }
 
         abort(403);
@@ -185,20 +176,20 @@ class UserController extends Controller
     public function approve(User $user): RedirectResponse
     {
         if (Auth::user()->can('edit users')) {
-    
-            $user->is_approved = ! $user->is_approved;
+            if ($user->is_approved) {
+                return redirect()->back()->with('success', 'User is already approved');
+            }
+
+            $user->is_approved = true;
             $user->approved_by = Auth::id();
             $user->approved_at = now();
             $user->save();
 
             $user->notify(new ClientApprovedNotification(Auth::user()->name));
 
-
             return redirect()->back()->with('success', 'User approved successfully')
-            ->with("user", $user) ;
-
+                ->with('user', $user);
         }
-  
 
         abort(403);
     }

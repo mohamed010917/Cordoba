@@ -9,70 +9,59 @@ use App\Models\Countrie;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
-
 class ClientController extends Controller
 {
-        
     public function index(Request $request): Response
     {
-        $search = $request->get('search', '');
-        $sort = $request->get('sort', 'latest');
-        $approvalStatus = $request->get('approval_status', 'all');
-        $dateFrom = $request->get('date_from');
-        $dateTo = $request->get('date_to');
-    
+        $search = (string) $request->query('search', '');
+        $sort = (string) $request->query('sort', 'latest');
+        $approvalStatus = (string) $request->query('approval_status', 'all');
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
+
         $clients = User::query()
             ->clients()
-    
             ->when($approvalStatus === 'approved', function ($query) {
                 $query->whereNotNull('approved_at');
             })
-    
             ->when($approvalStatus === 'not_approved', function ($query) {
                 $query->whereNull('approved_at');
             })
-    
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('phone', 'like', "%{$search}%")
-                      ->orWhere('national_id', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('national_id', 'like', "%{$search}%");
                 });
             })
-    
             ->when($dateFrom, function ($query) use ($dateFrom) {
                 $query->whereDate('created_at', '>=', $dateFrom);
             })
-    
             ->when($dateTo, function ($query) use ($dateTo) {
                 $query->whereDate('created_at', '<=', $dateTo);
             })
-    
             ->when($sort === 'name_asc', function ($query) {
                 $query->orderBy('name', 'asc');
             })
-    
             ->when($sort === 'name_desc', function ($query) {
                 $query->orderBy('name', 'desc');
             })
-    
             ->when($sort === 'oldest', function ($query) {
                 $query->oldest();
             })
-    
             ->when($sort === 'latest', function ($query) {
                 $query->latest();
             })
-    
             ->paginate(10)
             ->withQueryString();
-    
+
         return Inertia::render('manager/clients/Index', [
             'clients' => $clients,
             'filters' => [
@@ -84,6 +73,7 @@ class ClientController extends Controller
             ],
         ]);
     }
+
     public function create(): Response
     {
         $countries = Countrie::query()
@@ -96,12 +86,11 @@ class ClientController extends Controller
         ]);
     }
 
-
     public function store(StoreClientRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        if($request->hasFile('image'))
-        {
+
+        if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('users', 'public');
         }
 
@@ -136,8 +125,8 @@ class ClientController extends Controller
             ->clients()
             ->findOrFail($client);
 
-            $countries = Countrie::query()
-            ->select('id','name')
+        $countries = Countrie::query()
+            ->select('id', 'name')
             ->orderBy('name')
             ->get();
 
@@ -162,9 +151,9 @@ class ClientController extends Controller
         $client = User::query()
             ->clients()
             ->findOrFail($client);
-    
+
         $data = $request->validated();
-    
+
         $updateData = [
             'name' => $data['name'],
             'email' => $data['email'],
@@ -174,57 +163,55 @@ class ClientController extends Controller
             'country_id' => $data['country_id'],
             'is_active' => $data['is_active'] ?? true,
         ];
-    
+
         if ($request->hasFile('image')) {
             if ($client->image) {
                 Storage::disk('public')->delete($client->image);
             }
-    
+
             $updateData['image'] = $request->file('image')->store('users', 'public');
         }
-    
-        if (!empty($data['password'])) {
+
+        if (! empty($data['password'])) {
             $updateData['password'] = Hash::make($data['password']);
         }
-    
+
         $client->update($updateData);
-    
+
         return redirect('/manager/clients')
             ->with('success', 'Client updated successfully');
     }
-    
+
     public function destroy(int $client): RedirectResponse
     {
-        $clientId = $client;
         $client = User::query()
-        ->clients()
-        ->findOrFail($clientId);
+            ->clients()
+            ->findOrFail($client);
 
-        if($client->image)
-        {
+        if ($client->image) {
             Storage::disk('public')->delete($client->image);
         }
 
         $client->delete();
+
         return redirect('/manager/clients')
-        ->with('success', 'Client deleted successfully.');
+            ->with('success', 'Client deleted successfully.');
     }
 
     public function approve(int $client): RedirectResponse
-{
-    $client = User::query()
-        ->clients()
-        ->whereNull('approved_at')
-        ->findOrFail($client);
+    {
+        $client = User::query()
+            ->clients()
+            ->whereNull('approved_at')
+            ->findOrFail($client);
 
-    $client->update([
-        'approved_at' => now(),
-        'approved_by' => auth()->id(),
-    ]);
+        $client->update([
+            'approved_at' => now(),
+            'approved_by' => Auth::id(),
+        ]);
 
-    return redirect()
-        ->route('manager.clients.index')
-        ->with('success', 'Client approved successfully.');
-}
-
+        return redirect()
+            ->route('manager.clients.index')
+            ->with('success', 'Client approved successfully.');
+    }
 }
