@@ -37,6 +37,7 @@ return new class extends Migration
             $table->string('national_id')->nullable();
             $table->foreignId('created_by_manager_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('gender')->nullable();
+            $table->boolean('is_approved')->default(false);
             $table->timestamp('approved_at')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('banned_at')->nullable();
@@ -55,13 +56,13 @@ return new class extends Migration
         DB::statement('
             INSERT INTO users_rebuilt (
                 id, name, email, email_verified_at, password, image, role, is_active, is_banned, phone,
-                national_id, created_by_manager_id, gender, approved_at, approved_by, banned_at, banned_by,
+                national_id, created_by_manager_id, gender, is_approved, approved_at, approved_by, banned_at, banned_by,
                 remember_token, deleted_at, created_at, updated_at, country_id, two_factor_secret,
                 two_factor_recovery_codes, two_factor_confirmed_at, last_login_at, city_id
             )
             SELECT
                 id, name, email, email_verified_at, password, image, role, is_active, is_banned, phone,
-                national_id, created_by_manager_id, gender, approved_at, approved_by, banned_at, banned_by,
+                national_id, created_by_manager_id, gender, is_approved, approved_at, approved_by, banned_at, banned_by,
                 remember_token, deleted_at, created_at, updated_at, country_id, two_factor_secret,
                 two_factor_recovery_codes, two_factor_confirmed_at, last_login_at, city_id
             FROM users
