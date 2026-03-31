@@ -27,6 +27,7 @@ class Create
                 'phone' => $request->phone,
                 'national_id' => $request->national_id,
                 'country_id' => $request->country_id ,
+                'city_id' => $request->city_id ,
                 "created_by_manager_id" => Auth::id() ,
                 "gender" => $request->gender ,
             ]);

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+
 Route::post('/login', function (Request $request) {
     $request->validate([
         'email' => 'required|email',
@@ -34,4 +35,17 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::apiResource('reservations', ReservationsController::class)
         ->only(['index'])
         ->names(['index' => 'api.reservations.index']);
+});
+
+use Nnjeim\World\Models\Country;
+use Nnjeim\World\Models\City;
+
+Route::get('/countries', function () {
+    return Country::select('id', 'name')->get();
+});
+
+Route::get('/cities/{country_id}', function ($country_id) {
+    return City::where('country_id', $country_id)
+        ->select('id', 'name')
+        ->get();
 });

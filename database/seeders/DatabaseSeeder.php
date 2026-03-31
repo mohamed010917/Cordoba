@@ -67,7 +67,7 @@ class DatabaseSeeder extends Seeder
             $user->assignRole("user");
         });
         $this->call([
-            CountrieSeeder::class,
+          
             FloorSeeder::class,
             RoomSeeder::class,
             ReservationSeeder::class,

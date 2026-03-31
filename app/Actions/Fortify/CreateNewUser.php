@@ -25,6 +25,8 @@ class CreateNewUser implements CreatesNewUsers
             'national_id' => ['nullable', 'string', 'max:255'],
             'gender' => ['required', 'in:male,female'],
             'country_id' => ['required', 'exists:countries,id'],
+            'city_id' => ['required', 'exists:cities,id'],
+
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ])->validate();
 
@@ -42,6 +44,7 @@ class CreateNewUser implements CreatesNewUsers
             'national_id' => $input['national_id'] ?? null,
             'gender' => $input['gender'] ?? null,
             'country_id' => $input['country_id'] ?? null,
+            'city_id' => $input['city_id'] ?? null,
             'image' => $imagePath,
             'role' => 'user',
         ]);

@@ -30,6 +30,7 @@ class UpdateUser extends FormRequest
             'image' => ['nullable', 'image', 'max:2048' , 'mimes:jpg,jpeg,png,gif'],
             'role' => ['required', 'in:admin,manager,user,receptionist'],
             'is_active' => ['required', 'boolean'],
+             "city_id" => ['required' , 'exists:cities,id'],
             'phone' => ['nullable', 'string', 'max:20'],
             'national_id' => ['nullable', 'string', 'max:20'],
             'gender' => ['nullable', 'in:male,female,other'],   

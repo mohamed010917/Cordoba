@@ -3,6 +3,35 @@ import AuthLayout from '@/layouts/AuthLayout.vue'
 import InputError from '@/components/InputError.vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import { ref, onMounted, watch } from 'vue'
+
+const countries = ref([])
+const cities = ref([])
+
+onMounted(() => {
+  fetch('/api/countries')
+    .then(res => res.json())
+    .then(data => {
+      countries.value = data
+      console.log(countries.value)
+    }).catch(err => {
+      console.error('Error fetching countries:', err)
+    })
+})
+
+function loadCities() {
+  if (!form.country_id) return
+
+  fetch(`/api/cities/${form.country_id}`)
+    .then(res => res.json())
+    .then(data => {
+      cities.value = data
+      console.log(cities.value)
+    }).catch(err => {
+      console.error('Error fetching cities:', err)
+    })
+}
+
 
 const form = useForm({
   name: '',
@@ -13,16 +42,24 @@ const form = useForm({
   national_id: '',
   gender: '',
   country_id: '',
+    city_id: '', 
   image: null,
+})
+watch(() => form.country_id, (newVal) => {
+  if (!newVal) {
+    loadCities()    
+  }
 })
 
 function submit() {
   form.post('register')
 }
 
+
 function handleImageChange(event) {
   form.image = event.target.files[0]
 }
+
 </script>
 
 <template>
@@ -127,11 +164,42 @@ function handleImageChange(event) {
                         <InputError :message="form.errors.gender" />
                     </div>
 
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Country ID</label>
-                        <input v-model="form.country_id" type="number" required class="w-full bg-[#162133] border border-white/5 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 transition-all" />
+                        <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Country</label>
+
+                        <select v-model="form.country_id"
+                                @change="loadCities"
+                                class="w-full bg-[#162133] border border-white/5 rounded-xl px-4 py-3 text-white">
+                            
+                            <option value="">Select Country</option>
+
+                            <option v-for="country in countries"
+                                    :key="country.id"
+                                    :value="country.id">
+                            {{ country.name }}
+                            </option>
+                        </select>
+
                         <InputError :message="form.errors.country_id" />
-                    </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">City</label>
+
+                            <select v-model="form.city_id"
+                                    class="w-full bg-[#162133] border border-white/5 rounded-xl px-4 py-3 text-white">
+                                
+                                <option value="">Select City</option>
+
+                                <option v-for="city in cities"
+                                        :key="city.id"
+                                        :value="city.id">
+                                {{ city.name }}
+                                </option>
+                            </select>
+
+                            <InputError :message="form.errors.city_id" />
+                        </div>
 
                     <div class="md:col-span-2 space-y-1">
                         <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Avatar</label>

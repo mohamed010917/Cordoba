@@ -50,10 +50,7 @@ return new class extends Migration
             $table->integer('last_activity')->index();
         });
 
-        // make relationship between users and countries tables after creting users and countries tables
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('country_id')->nullable()->constrained()->onDelete('set null');
-        });
+   
     }
 
 

@@ -34,6 +34,7 @@ class userCreate extends FormRequest
             'national_id' => ['nullable', 'string', 'max:20'],
             'gender' => ['nullable', 'in:male,female,other'],   
             "country_id" => ['required' , 'exists:countries,id'],
+            "city_id" => ['required' , 'exists:cities,id'],
 
         ];
     }
