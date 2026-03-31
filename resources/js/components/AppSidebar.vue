@@ -3,7 +3,7 @@ import {  Link, usePage } from '@inertiajs/vue3';
 import {  BookAIcon, Flower2Icon, LayoutGrid, Magnet, User2Icon } from 'lucide-vue-next';
 
 import { computed } from 'vue';
-import {  Users } from 'lucide-vue-next';
+import {  Users, ChartPie } from 'lucide-vue-next';
 import { route } from 'ziggy-js';
 
 import NavMain from '@/components/NavMain.vue';
@@ -53,6 +53,11 @@ const admin: NavItem[] = [
         href: '/admin/receptionists',
         icon: Users,
     },
+    {
+        title: 'Statistics',
+        href: '/admin/statistics',
+        icon: ChartPie,
+    },
 ];
 
 
@@ -82,6 +87,11 @@ const manager: NavItem[] = [
         href: '/manager/clients',
         icon: Users,
 
+    },
+    {
+        title: 'Statistics',
+        href: '/manager/statistics',
+        icon: ChartPie,
     },
 ];
 
