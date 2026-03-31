@@ -7,7 +7,9 @@ use App\Actions\user\Index as IndexUsersAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateUser;
 use App\Http\Requests\userCreate;
-use App\Models\Countrie;
+
+use Nnjeim\World\Models\Country;
+use Nnjeim\World\Models\City;
 use App\Models\User;
 use App\Notifications\ClientApprovedNotification;
 use Illuminate\Http\RedirectResponse;
@@ -32,7 +34,7 @@ class UserController extends Controller
     public function create(): Response
     {
         return Inertia::render('users/create', [
-            'countries' => Countrie::all(),
+            'Countrys' => Country::all(),
         ]);
     }
 
@@ -45,7 +47,7 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'An error occurred while creating the user');
         }
 
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin.users.index')->with('success', 'User created successfully');
 
     }
 
@@ -65,7 +67,7 @@ class UserController extends Controller
     {
         return Inertia::render('users/edit', [
             'user' => $user->load('country'),
-            'countries' => Countrie::all(),
+            'Countrys' => Country::select('id', 'name')->get(),
         ]);
     }
 
@@ -82,6 +84,7 @@ class UserController extends Controller
                 'phone' => $request->phone,
                 'national_id' => $request->national_id,
                 'country_id' => $request->country_id,
+                'city_id' => $request->city_id,
             ]);
 
 

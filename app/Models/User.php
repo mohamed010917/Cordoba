@@ -66,7 +66,12 @@ class User extends Authenticatable
 
     public function country()
     {
-        return $this->belongsTo(Countrie::class);
+        return $this->belongsTo(\Nnjeim\World\Models\Country::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(\Nnjeim\World\Models\City::class);
     }
 
     public function createdReceptionists()

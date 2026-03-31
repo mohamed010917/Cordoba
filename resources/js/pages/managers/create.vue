@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted, watch } from 'vue'
 import { Head, useForm, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { BreadcrumbItem } from '@/types'
@@ -12,12 +12,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 const page = usePage()
-const countries = page.props.countries
 
 /* UI States */
 const showPassword = ref(false)
 const imagePreview = ref<string | null>(null)
 const toast = ref<string | null>(null)
+
+/* ✅ API Data */
+const countries = ref([])
+const cities = ref([])
 
 /* Form */
 const form = useForm({
@@ -29,6 +32,7 @@ const form = useForm({
     national_id: '',
     gender: '',
     country_id: '',
+    city_id: '', // ✅ مهم
     image: null as File | null,
     is_active: true
 })
@@ -36,6 +40,7 @@ const form = useForm({
 /* Submit */
 const submit = () => {
     form.post('/admin/managers', {
+        forceFormData: true,
         onError: async () => {
             await nextTick()
             const el = document.querySelector('.error-input') as HTMLElement
@@ -64,35 +69,63 @@ const showToast = (msg: string) => {
     toast.value = msg
     setTimeout(() => (toast.value = null), 3000)
 }
+
+/* ✅ Load Countries */
+onMounted(() => {
+  fetch('/api/countries')
+    .then(res => res.json())
+    .then(data => {
+      countries.value = data
+    })
+    .catch(err => console.error('Error:', err))
+})
+
+/* ✅ Load Cities */
+function loadCities() {
+  if (!form.country_id) {
+    cities.value = []
+    return
+  }
+
+  fetch(`/api/cities/${form.country_id}`)
+    .then(res => res.json())
+    .then(data => {
+      cities.value = data
+    })
+    .catch(err => console.error('Error:', err))
+}
+
+/* ✅ Watch Country */
+watch(() => form.country_id, (newVal) => {
+  if (newVal) {
+    loadCities()
+  } else {
+    cities.value = []
+  }
+})
 </script>
+
 <template>
     <Head title="Create User" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
 
-        <!-- 🔔 Toast -->
+        <!-- Toast -->
         <div v-if="toast"
-            class="fixed top-5 right-5 bg-black text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in">
+            class="fixed top-5 right-5 bg-black text-white px-4 py-2 rounded-lg shadow-lg z-50">
             {{ toast }}
         </div>
 
-        <div class="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto animate-fade-in">
+        <div class="p-4 max-w-6xl mx-auto">
 
-            <!-- Header -->
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                    Create managers
-                </h1>
-                <p class="text-gray-500 dark:text-gray-400 mt-1">
-                    Add a new manager to your system
-                </p>
-            </div>
+            <h1 class="text-3xl font-bold mb-6">
+                Create managers
+            </h1>
 
-            <!-- Card -->
             <form @submit.prevent="submit"
-                class="bg-white/80 dark:bg-gray-900/80 backdrop-blur rounded-3xl shadow-xl border p-6 sm:p-8 space-y-8">
+                class="bg-white dark:bg-gray-900 rounded-3xl shadow-xl p-6 space-y-6">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid md:grid-cols-2 gap-4">
 
                     <!-- Name -->
                     <div>
@@ -113,22 +146,12 @@ const showToast = (msg: string) => {
                     </div>
 
                     <!-- Password -->
-                    <div class="relative">
+                    <div>
                         <label class="form-label">Password</label>
-
-                        <input
-                            v-model="form.password"
+                        <input v-model="form.password"
                             :type="showPassword ? 'text' : 'password'"
-                            class="form-input pr-10"
-                            :class="{ 'error-input': form.errors.password }"
-                        />
-
-                        <button type="button"
-                            @click="showPassword = !showPassword"
-                            class="absolute right-3 top-9">
-                            👁️
-                        </button>
-
+                            class="form-input"
+                            :class="{ 'error-input': form.errors.password }" />
                         <p v-if="form.errors.password" class="error-text">
                             {{ form.errors.password }}
                         </p>
@@ -153,11 +176,8 @@ const showToast = (msg: string) => {
                             <option value="">Select</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
-                            <option value="other">Other</option>
                         </select>
                     </div>
-
-       
 
                     <!-- Country -->
                     <div>
@@ -175,32 +195,39 @@ const showToast = (msg: string) => {
                         </p>
                     </div>
 
+                    <!-- City -->
+                    <div>
+                        <label class="form-label">City</label>
+                        <select v-model="form.city_id"
+                            class="form-input"
+                            :class="{ 'error-input': form.errors.city_id }">
+                            <option value="">Select</option>
+                            <option v-for="c in cities" :key="c.id" :value="c.id">
+                                {{ c.name }}
+                            </option>
+                        </select>
+                        <p v-if="form.errors.city_id" class="error-text">
+                            {{ form.errors.city_id }}
+                        </p>
+                    </div>
+
                     <!-- Active -->
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
                         <input type="checkbox" v-model="form.is_active" />
                         <span>Active</span>
                     </div>
 
                     <!-- Image -->
                     <div class="md:col-span-2">
-                        <label class="form-label">Profile Image</label>
-
-                        <div class="border-2 border-dashed rounded-xl p-6 text-center">
-                            <input type="file" @change="handleFile" hidden id="file" />
-                            <label for="file" class="cursor-pointer">
-                                Upload Image
-                            </label>
-
-                            <img v-if="imagePreview"
-                                :src="imagePreview"
-                                class="mt-4 w-24 h-24 rounded-full mx-auto shadow" />
-                        </div>
+                        <input type="file" @change="handleFile" />
+                        <img v-if="imagePreview"
+                            :src="imagePreview"
+                            class="mt-3 w-20 h-20 rounded-full" />
                     </div>
 
                 </div>
 
-                <!-- Buttons -->
-                <div class="flex justify-end gap-3 pt-6 border-t">
+                <div class="flex justify-end gap-3 pt-4">
                     <button type="button"
                         @click="$inertia.visit('/admin/managers')"
                         class="btn-secondary">
@@ -210,8 +237,7 @@ const showToast = (msg: string) => {
                     <button type="submit"
                         :disabled="form.processing"
                         class="btn-primary">
-                        <span v-if="form.processing">Creating...</span>
-                        <span v-else>Create User</span>
+                        {{ form.processing ? 'Creating...' : 'Create User' }}
                     </button>
                 </div>
 
@@ -221,84 +247,10 @@ const showToast = (msg: string) => {
 </template>
 
 <style>
-/* Animation */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.4s ease;
-}
-
-/* Inputs */
-.form-input {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid #d1d5db;
-    background: white;
-    transition: all 0.2s ease;
-}
-
-.dark .form-input {
-    background: #1f2937;
-    border-color: #374151;
-    color: white;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
-}
-
-/* Label */
-.form-label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #6b7280;
-}
-
-/* Buttons */
-.btn-primary {
-    padding: 10px 18px;
-    background: #6366f1;
-    color: white;
-    border-radius: 12px;
-    transition: all 0.2s;
-}
-
-.btn-primary:hover {
-    background: #4f46e5;
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    padding: 10px 18px;
-    background: #e5e7eb;
-    border-radius: 12px;
-}
-
-.dark .btn-secondary {
-    background: #374151;
-    color: white;
-}
-.animate-fade-in {
-    animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
 .form-input {
     width: 100%;
     padding: 10px;
-    border-radius: 12px;
+    border-radius: 10px;
     border: 1px solid #ccc;
 }
 
@@ -312,13 +264,13 @@ const showToast = (msg: string) => {
     background: #6366f1;
     color: white;
     padding: 10px 18px;
-    border-radius: 12px;
+    border-radius: 10px;
 }
 
 .btn-secondary {
     background: #e5e7eb;
     padding: 10px 18px;
-    border-radius: 12px;
+    border-radius: 10px;
 }
 
 .error-input {
@@ -328,6 +280,5 @@ const showToast = (msg: string) => {
 .error-text {
     color: red;
     font-size: 12px;
-    margin-top: 4px;
 }
 </style>
