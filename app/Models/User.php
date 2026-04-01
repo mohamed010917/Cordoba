@@ -135,6 +135,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->is_active === true;
     }
 
+    // scopes
     public function scopeReceptionists(Builder $query): Builder
     {
         return $query->where('role', 'receptionist');

@@ -6,27 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('country_id')->nullable();
-            $table->unsignedBigInteger('city_id')->nullable();
-
-            $table->foreign('country_id')->references('id')->on('countries')->nullOnDelete();
-            $table->foreign('city_id')->references('id')->on('cities')->nullOnDelete();
-        });
+        if (! Schema::hasColumn('users', 'city_id')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->unsignedBigInteger('city_id')->nullable();
+                $table->foreign('city_id')->references('id')->on('cities')->nullOnDelete();
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('users', 'city_id')) {
+                $table->dropForeign(['city_id']);
+                $table->dropColumn('city_id');
+            }
         });
     }
 };

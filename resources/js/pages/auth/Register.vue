@@ -8,29 +8,40 @@ import { ref, onMounted, watch } from 'vue'
 const countries = ref([])
 const cities = ref([])
 
-onMounted(() => {
-  fetch('/api/countries')
-    .then(res => res.json())
-    .then(data => {
-      countries.value = data
-      console.log(countries.value)
-    }).catch(err => {
-      console.error('Error fetching countries:', err)
-    })
-})
+const jsonHeaders = { Accept: 'application/json' }
 
-function loadCities() {
-  if (!form.country_id) return
-
-  fetch(`/api/cities/${form.country_id}`)
-    .then(res => res.json())
-    .then(data => {
-      cities.value = data
-      console.log(cities.value)
-    }).catch(err => {
-      console.error('Error fetching cities:', err)
-    })
+async function loadCountries() {
+  try {
+    const res = await fetch('/api/countries', { headers: jsonHeaders })
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`)
+    }
+    countries.value = await res.json()
+  } catch (e) {
+    console.error('Error fetching countries:', e)
+  }
 }
+
+async function loadCities() {
+  if (!form.country_id) {
+    cities.value = []
+    return
+  }
+  try {
+    const res = await fetch(`/api/cities/${form.country_id}`, { headers: jsonHeaders })
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`)
+    }
+    cities.value = await res.json()
+  } catch (e) {
+    console.error('Error fetching cities:', e)
+    cities.value = []
+  }
+}
+
+onMounted(() => {
+  loadCountries()
+})
 
 
 const form = useForm({
@@ -46,8 +57,11 @@ const form = useForm({
   image: null,
 })
 watch(() => form.country_id, (newVal) => {
-  if (!newVal) {
-    loadCities()    
+  if (newVal) {
+    loadCities()
+  } else {
+    cities.value = []
+    form.city_id = ''
   }
 })
 
@@ -167,9 +181,10 @@ function handleImageChange(event) {
                         <div class="space-y-1">
                         <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Country</label>
 
-                        <select v-model="form.country_id"
-                                @change="loadCities"
-                                class="w-full bg-[#162133] border border-white/5 rounded-xl px-4 py-3 text-white">
+                        <select
+                                v-model="form.country_id"
+                                class="w-full bg-[#162133] border border-white/5 rounded-xl px-4 py-3 text-white"
+                        >
                             
                             <option value="">Select Country</option>
 

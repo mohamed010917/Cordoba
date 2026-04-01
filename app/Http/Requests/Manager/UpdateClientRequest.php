@@ -7,14 +7,15 @@ use Illuminate\Validation\Rule;
 
 class UpdateClientRequest extends FormRequest
 {
-    public function authorize():bool
+    public function authorize(): bool
     {
-        return auth()->check() &&auth()->user()->isManager();
+        return auth()->check() && auth()->user()->isManager();
     }
-    
-    public function rules():array
+
+    public function rules(): array
     {
         $clientId = $this->route('client');
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -28,6 +29,10 @@ class UpdateClientRequest extends FormRequest
             'national_id' => ['nullable', 'string', 'max:255'],
             'gender' => ['required', 'in:male,female'],
             'country_id' => ['required', 'exists:countries,id'],
+            'city_id' => [
+                'required',
+                Rule::exists('cities', 'id')->where(fn ($query) => $query->where('country_id', $this->input('country_id'))),
+            ],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active' => ['nullable', 'boolean'],
         ];

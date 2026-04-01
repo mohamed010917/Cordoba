@@ -4,9 +4,11 @@ use App\Http\Controllers\admin\MangerController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\Manager\ClientController;
+use App\Http\Controllers\Manager\DashboardController as ManagerDashboardController;
 use App\Http\Controllers\Manager\ReceptionistController;
 use App\Http\Controllers\Receptionist\ApprovedClientController;
 use App\Http\Controllers\Receptionist\ClientReservationController;
+use App\Http\Controllers\Receptionist\DashboardController as ReceptionistDashboardController;
 use App\Http\Controllers\Receptionist\PendingClientController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\RoomController;
@@ -51,25 +53,20 @@ Route::middleware(['auth', 'verified', User::class])->group(function () {
     });
 });
 
-Route::middleware(['auth', Manger::class, 'verified'])->prefix('manager')
+Route::middleware(['auth', 'verified', Manger::class])
+    ->prefix('manager')
     ->name('manager.')
     ->group(function () {
-        Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+        Route::get('/dashboard', ManagerDashboardController::class)->name('dashboard');
+
         Route::resource('floors', FloorController::class)->except(['show']);
         Route::resource('rooms', RoomController::class)->except(['show']);
+
         Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
         Route::get('/statistics/gender', [StatisticsController::class, 'gender'])->name('statistics.gender');
         Route::get('/statistics/revenue', [StatisticsController::class, 'revenue'])->name('statistics.revenue');
         Route::get('/statistics/countries', [StatisticsController::class, 'countries'])->name('statistics.countries');
         Route::get('/statistics/top-clients', [StatisticsController::class, 'topClients'])->name('statistics.top-clients');
-    });
-
-// manager routes
-Route::middleware(['auth', 'verified', Manger::class])
-    ->prefix('manager')
-    ->name('manager.')
-    ->group(function () {
-        Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
 
         Route::get('/receptionists', [ReceptionistController::class, 'index'])->name('receptionists.index');
         Route::get('/receptionists/create', [ReceptionistController::class, 'create'])->name('receptionists.create');
@@ -89,12 +86,11 @@ Route::middleware(['auth', 'verified', Manger::class])
         Route::patch('/clients/{client}/approve', [ClientController::class, 'approve'])->name('clients.approve');
     });
 
-// receptionist
 Route::middleware(['auth', 'verified', Receptionist::class])
     ->prefix('receptionist')
     ->name('receptionist.')
     ->group(function () {
-        Route::inertia('/dashboard', 'Dashboard')->name('dashboard');
+        Route::get('/dashboard', ReceptionistDashboardController::class)->name('dashboard');
 
         Route::get('/clients/pending', [PendingClientController::class, 'index'])->name('clients.pending');
         Route::patch('/clients/{client}/approve', [PendingClientController::class, 'approve'])->name('clients.approve');

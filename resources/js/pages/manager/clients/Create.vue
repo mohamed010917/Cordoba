@@ -1,10 +1,15 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import { ref, watch, onMounted } from 'vue'
 
 defineProps({
   countries: Array,
 })
+
+const cities = ref([])
+
+const jsonHeaders = { Accept: 'application/json' }
 
 const form = useForm({
   name: '',
@@ -15,8 +20,42 @@ const form = useForm({
   national_id: '',
   gender: '',
   country_id: '',
+  city_id: '',
   image: null,
   is_active: true,
+})
+
+async function loadCities() {
+  if (!form.country_id) {
+    cities.value = []
+    return
+  }
+  try {
+    const res = await fetch(`/api/cities/${form.country_id}`, { headers: jsonHeaders })
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`)
+    }
+    cities.value = await res.json()
+  } catch {
+    cities.value = []
+  }
+}
+
+watch(
+  () => form.country_id,
+  () => {
+    form.city_id = ''
+    cities.value = []
+    if (form.country_id) {
+      loadCities()
+    }
+  },
+)
+
+onMounted(() => {
+  if (form.country_id) {
+    loadCities()
+  }
 })
 
 function submit() {
@@ -43,7 +82,7 @@ function handleImageChange(event) {
             </h1>
           </div>
           <p class="pl-3.5 text-sm text-gray-500 dark:text-gray-400">
-            Add a new client 
+            Add a new client
           </p>
         </div>
 
@@ -191,6 +230,26 @@ function handleImageChange(event) {
             </div>
           </div>
 
+          <!-- City -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              City
+            </label>
+            <select
+              v-model="form.city_id"
+              class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition-all hover:border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:hover:border-indigo-500/60 dark:focus:border-indigo-500 dark:focus:ring-indigo-500/10"
+              :disabled="!form.country_id"
+            >
+              <option value="">{{ form.country_id ? 'Select city' : 'Select country first' }}</option>
+              <option v-for="city in cities" :key="city.id" :value="city.id">
+                {{ city.name }}
+              </option>
+            </select>
+            <div v-if="form.errors.city_id" class="mt-2 text-sm text-red-500">
+              {{ form.errors.city_id }}
+            </div>
+          </div>
+
           <!-- Image -->
           <div class="md:col-span-2">
             <div class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-950/50">
@@ -200,8 +259,8 @@ function handleImageChange(event) {
                 </label>
                 <input
                   type="file"
-                  @change="handleImageChange"
                   class="block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:file:bg-indigo-500 dark:hover:file:bg-indigo-400"
+                  @change="handleImageChange"
                 />
                 <div v-if="form.errors.image" class="mt-2 text-sm text-red-500">
                   {{ form.errors.image }}

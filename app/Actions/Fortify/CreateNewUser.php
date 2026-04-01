@@ -2,11 +2,12 @@
 
 namespace App\Actions\Fortify;
 
-use Illuminate\Support\Facades\Hash;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Spatie\Permission\Models\Role;
 
@@ -25,14 +26,17 @@ class CreateNewUser implements CreatesNewUsers
             'national_id' => ['nullable', 'string', 'max:255'],
             'gender' => ['required', 'in:male,female'],
             'country_id' => ['required', 'exists:countries,id'],
-            'city_id' => ['required', 'exists:cities,id'],
+            'city_id' => [
+                'required',
+                Rule::exists('cities', 'id')->where(fn ($query) => $query->where('country_id', $input['country_id'])),
+            ],
 
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ])->validate();
 
         $imagePath = null;
 
-        if (!empty($input['image'])) {
+        if (! empty($input['image'])) {
             $imagePath = $input['image']->store('users', 'public');
         }
 

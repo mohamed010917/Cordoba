@@ -1,11 +1,16 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import { onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
   client: Object,
   countries: Array,
 })
+
+const cities = ref([])
+
+const jsonHeaders = { Accept: 'application/json' }
 
 const form = useForm({
   name: props.client.name || '',
@@ -16,8 +21,46 @@ const form = useForm({
   national_id: props.client.national_id || '',
   gender: props.client.gender || '',
   country_id: props.client.country_id || '',
+  city_id: props.client.city_id || '',
   image: null,
   is_active: props.client.is_active ?? true,
+})
+
+async function loadCities() {
+  if (!form.country_id) {
+    cities.value = []
+    return
+  }
+  try {
+    const res = await fetch(`/api/cities/${form.country_id}`, { headers: jsonHeaders })
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`)
+    }
+    cities.value = await res.json()
+  } catch {
+    cities.value = []
+  }
+}
+
+watch(
+  () => form.country_id,
+  () => {
+    form.city_id = ''
+    cities.value = []
+    if (form.country_id) {
+      loadCities()
+    }
+  },
+)
+
+onMounted(() => {
+  if (form.country_id) {
+    loadCities().then(() => {
+      if (form.city_id && !cities.value.some((c) => String(c.id) === String(form.city_id))) {
+        form.city_id = ''
+      }
+    })
+  }
 })
 
 function submit() {
@@ -194,6 +237,26 @@ function handleImageChange(event) {
             </select>
             <div v-if="form.errors.country_id" class="mt-2 text-sm text-red-500">
               {{ form.errors.country_id }}
+            </div>
+          </div>
+
+          <!-- City -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              City
+            </label>
+            <select
+              v-model="form.city_id"
+              class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition-all hover:border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:hover:border-indigo-500/60 dark:focus:border-indigo-500 dark:focus:ring-indigo-500/10"
+              :disabled="!form.country_id"
+            >
+              <option value="">{{ form.country_id ? 'Select city' : 'Select country first' }}</option>
+              <option v-for="city in cities" :key="city.id" :value="city.id">
+                {{ city.name }}
+              </option>
+            </select>
+            <div v-if="form.errors.city_id" class="mt-2 text-sm text-red-500">
+              {{ form.errors.city_id }}
             </div>
           </div>
 

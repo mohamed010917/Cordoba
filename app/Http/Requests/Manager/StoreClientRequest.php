@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreClientRequest extends FormRequest
 {
@@ -21,6 +22,10 @@ class StoreClientRequest extends FormRequest
             'national_id' => ['nullable', 'string', 'max:255'],
             'gender' => ['required', 'in:male,female'],
             'country_id' => ['required', 'exists:countries,id'],
+            'city_id' => [
+                'required',
+                Rule::exists('cities', 'id')->where(fn ($query) => $query->where('country_id', $this->input('country_id'))),
+            ],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active' => ['nullable', 'boolean'],
         ];
