@@ -79,9 +79,7 @@ const toggleBan = (user: any) => {
 }
 
 const deleteUser = (user: any) => {
-    if (!confirm(`Delete ${user.name}? This cannot be undone.`)) {
-return
-}
+
 
     router.post(`/admin/users/${user.id}`, { _method: 'delete' }, {
         onSuccess: () => console.log('Deleted'),
