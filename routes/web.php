@@ -18,14 +18,26 @@ use App\Http\Middleware\ApprovedClient;
 use App\Http\Middleware\Manger;
 use App\Http\Middleware\Receptionist;
 use App\Http\Middleware\User;
+use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
-Route::inertia('/', 'Welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
-])->name('home');
+Route::get('/', function () {
+    $featuredRooms = Room::available()
+        ->with('floor:id,number')
+        ->select('id', 'number', 'capacity', 'price_cents', 'floor_id')
+        ->orderBy('price_cents')
+        ->limit(3)
+        ->get();
+
+    return Inertia::render('Welcome', [
+        'canRegister' => Features::enabled(Features::registration()),
+        'availableRoomsCount' => Room::available()->count(),
+        'featuredRooms' => $featuredRooms,
+    ]);
+})->name('home');
 
 Route::middleware(['auth', 'verified', User::class])->group(function () {
     Route::get('dashboard', function (Request $request) {
