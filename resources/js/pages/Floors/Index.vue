@@ -4,6 +4,7 @@ import { router, Link, Head } from '@inertiajs/vue3'
 import { type ColumnDef } from '@tanstack/vue-table'
 import { Button } from '@/components/ui/button'
 import DataTable from '@/components/shared/DataTable.vue'
+import Swal from 'sweetalert2'
 
 import { route } from 'ziggy-js'
 import AppLayout from '@/layouts/AppLayout.vue'
@@ -95,8 +96,17 @@ const columns = computed<ColumnDef<Floor>[]>(() => {
     return cols
 })
 
-function deleteFloor(floor: Floor) {
-    if (!confirm(`Delete floor "${floor.name}"? This cannot be undone.`)) {
+async function deleteFloor(floor: Floor) {
+    const result = await Swal.fire({
+        title: `Delete floor "${floor.name}"?`,
+        text: 'This cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete',
+        cancelButtonText: 'Cancel',
+    })
+
+    if (!result.isConfirmed) {
         return
     }
 
