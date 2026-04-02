@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 class StoreReceptionistRequest extends FormRequest{
     public function authorize(): bool
     {
-        return Auth::check() && auth()->user()->hasRole('manager');
+        return Auth::check() && ( auth()->user()->hasRole('manager') || auth()->user()->hasRole('admin'));
     }
 
     public function rules(): array 
@@ -21,7 +21,7 @@ class StoreReceptionistRequest extends FormRequest{
             'phone' => ['nullable', 'string', 'max:30'],
             'national_id' => ['nullable', 'string', 'max:255'],
             'gender' => ['nullable', 'in:male,female'],
-            'country_id' => ['nullable', 'exists:countries,id'],
+          
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }
