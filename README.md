@@ -32,16 +32,16 @@ This project was built for **ITI Intake 46 – Open Source Track (Mansoura Branc
 From the project root:
 
 1. Install backend dependencies
-	- `composer install`
+    - `composer install`
 2. Install frontend dependencies
-	- `npm install`
+    - `npm install`
 3. Create environment file
-	- `cp .env.example .env`
+    - `cp .env.example .env`
 4. Generate app key
-	- `php artisan key:generate`
+    - `php artisan key:generate`
 5. Configure database in `.env`
 6. Run migrations + seeders
-	- `php artisan migrate --seed`
+    - `php artisan migrate --seed`
 
 > Alternative one-shot setup (from `composer.json`):
 >
@@ -55,7 +55,7 @@ Use the full development stack (Laravel server + queue worker + Vite):
 
 Then open:
 
-- http://127.0.0.1:8000
+- <http://127.0.0.1:8000>
 
 ---
 
