@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h } from 'vue'
+import { computed, h, ref } from 'vue'
 import { router, Link, Head } from '@inertiajs/vue3'
 import { type ColumnDef } from '@tanstack/vue-table'
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,8 @@ const props = defineProps<{
     filters: Record<string, string>
     url: string
 }>()
+
+const deleteErrorMessage = ref<string | null>(null)
 
 const columns = computed<ColumnDef<Floor>[]>(() => {
     const cols: ColumnDef<Floor>[] = [
@@ -100,7 +102,12 @@ function deleteFloor(floor: Floor) {
 
     router.delete(route('manager.floors.destroy', floor.id), {
         preserveState: true,
-        onError: (errors) => alert(Object.values(errors).join('\n')),
+        onSuccess: () => {
+            deleteErrorMessage.value = null
+        },
+        onError: (errors) => {
+            deleteErrorMessage.value = String(Object.values(errors)[0] ?? 'Failed to delete floor.')
+        },
     })
 }
 
@@ -119,6 +126,13 @@ const breadcrumbs = [
                 <Link :href="route('manager.floors.create')">
                     <Button>Add Floor</Button>
                 </Link>
+            </div>
+
+            <div
+                v-if="deleteErrorMessage"
+                class="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            >
+                {{ deleteErrorMessage }}
             </div>
     
             <DataTable
