@@ -108,7 +108,7 @@ class ReceptionistController extends Controller
             'phone' => $data['phone'] ?? null,
             'national_id' => $data['national_id'] ?? null,
             'gender' => $data['gender'] ?? null,
-            'country_id' => $data['country_id'] ?? null,
+           
             'image' => $data['image'] ?? null,
             'role' => 'receptionist',
             'created_by_manager_id' => auth()->id(),
@@ -136,7 +136,7 @@ class ReceptionistController extends Controller
                 'phone' => $receptionist->phone,
                 'national_id' => $receptionist->national_id,
                 'gender' => $receptionist->gender,
-                'country_id' => $receptionist->country_id,
+                
                 'image' => $receptionist->image,
             ],
         ]);
@@ -161,7 +161,7 @@ class ReceptionistController extends Controller
             'phone' => $data['phone'] ?? null,
             'national_id' => $data['national_id'] ?? null,
             'gender' => $data['gender'] ?? null,
-            'country_id' => $data['country_id'] ?? null,
+            
         ];
     
         if ($request->hasFile('image')) {

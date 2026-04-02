@@ -14,7 +14,7 @@ const form = useForm({
   phone: props.receptionist.phone || '',
   national_id: props.receptionist.national_id || '',
   gender: props.receptionist.gender || '',
-  country_id: props.receptionist.country_id || '',
+  
   image: null,
 })
 
@@ -165,18 +165,7 @@ function handleImageChange(event) {
               </div>
             </div>
 
-            <div class="space-y-1.5">
-              <label for="receptionist-country-id" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Country ID</label>
-              <input
-                id="receptionist-country-id"
-                v-model="form.country_id"
-                type="number"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 shadow-sm transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-600 dark:bg-gray-900/50 dark:text-white dark:focus:border-indigo-400 dark:focus:ring-indigo-400/20"
-              />
-              <div v-if="form.errors.country_id" class="text-sm text-red-600 dark:text-red-400">
-                {{ form.errors.country_id }}
-              </div>
-            </div>
+        
           </div>
         </div>
 

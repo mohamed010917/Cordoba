@@ -11,7 +11,7 @@ class UpdateReceptionistRequest extends FormRequest
      */
     public function authorize(): bool
     {       
-        return auth()->check() && auth()->user()->isManager();
+        return auth()->check() && (auth()->user()->isManager() || auth()->user()->isAdmin());
     }
 
     /**
@@ -35,7 +35,7 @@ class UpdateReceptionistRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:30'],
             'national_id' => ['nullable', 'string', 'max:255'],
             'gender' => ['nullable', 'in:male,female'],
-            'country_id' => ['nullable', 'exists:countries,id'],
+           
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }
