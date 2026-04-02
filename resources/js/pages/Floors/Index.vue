@@ -71,7 +71,7 @@ const columns = computed<ColumnDef<Floor>[]>(() => {
                         default: () =>
                             h(
                                 Button,
-                                { variant: 'outline', size: 'sm' },
+                                { type: 'button', variant: 'outline', size: 'sm' },
                                 { default: () => 'Edit' },
                             ),
                     },
@@ -79,6 +79,7 @@ const columns = computed<ColumnDef<Floor>[]>(() => {
                 h(
                     Button,
                     {
+                        type: 'button',
                         variant: 'destructive',
                         size: 'sm',
                         onClick: () => deleteFloor(floor),
