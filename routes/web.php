@@ -45,7 +45,7 @@ Route::middleware(['auth', 'verified', User::class])->group(function () {
             return redirect()->route('pending-approval');
         }
 
-        return Inertia::render('Dashboard');
+        return Inertia::render('userDashbord');
     })->name('dashboard');
 
     Route::get('pending-approval', function (Request $request) {
