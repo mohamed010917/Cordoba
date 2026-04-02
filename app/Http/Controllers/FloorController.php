@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreFloorRequest;
 use App\Http\Requests\UpdateFloorRequest;
 use App\Models\Floor;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,18 +25,24 @@ class FloorController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('number', 'like', "%{$search}%");
+                    ->orWhere('number', 'like', "%{$search}%");
             });
+        }
+
+        $user = $request->user();
+
+        if (! $user) {
+            abort(403);
         }
 
         $floors = $query->paginate($request->input('per_page', 10))
             ->withQueryString();
 
         return Inertia::render('Floors/Index', [
-            'floors'  => $floors,
-            'isAdmin' => auth()->user()->hasRole('admin'),
+            'floors' => $floors,
+            'isAdmin' => $user->hasRole('admin'),
             'filters' => $request->only(['search', 'sort_by', 'sort_dir']),
-            'url'     => route('manager.floors.index'),
+            'url' => route('manager.floors.index'),
         ]);
     }
 
@@ -52,10 +57,16 @@ class FloorController extends Controller
 
     public function store(StoreFloorRequest $request): RedirectResponse
     {
+        $user = $request->user();
+
+        if (! $user) {
+            abort(403);
+        }
+
         Floor::create([
-            'name'      => $request->name,
-            'number'    => Floor::generateNumber(),
-            'manger_id' => auth()->id(),
+            'name' => $request->name,
+            'number' => Floor::generateNumber(),
+            'manger_id' => $user->id,
         ]);
 
         return redirect()->route('manager.floors.index')
@@ -79,21 +90,18 @@ class FloorController extends Controller
             ->with('success', 'Floor updated successfully.');
     }
 
-    public function destroy(Floor $floor): JsonResponse
+    public function destroy(Floor $floor): RedirectResponse
     {
         $this->authorize('delete', $floor);
 
         if ($floor->hasRooms()) {
-            return response()->json([
-                'message' => 'Cannot delete floor: it has rooms associated with it.',
-            ], 422);
+            return redirect()->back()->withErrors([
+                'floor' => 'Cannot delete floor: it has rooms associated with it.',
+            ]);
         }
 
         $floor->delete();
-        if (!auth('api')->check()) {
-          return redirect()->back()->with('success', 'Floor deleted successfully.'); 
-        }
 
-        return response()->json(['message' => 'Floor deleted successfully.']);
+        return redirect()->back()->with('success', 'Floor deleted successfully.');
     }
 }
