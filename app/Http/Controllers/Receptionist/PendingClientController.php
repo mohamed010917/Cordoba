@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Receptionist;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\ClientApprovedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -45,9 +47,12 @@ class PendingClientController extends Controller
             ->findOrFail($client);
 
         $client->update([
+            'is_approved' => true,
             'approved_at' => now(),
-            'approved_by' => auth()->id(),
+            'approved_by' => Auth::id(),
         ]);
+
+        $client->notify(new ClientApprovedNotification(Auth::user()?->name));
 
         return redirect()
             ->route('receptionist.clients.pending')
