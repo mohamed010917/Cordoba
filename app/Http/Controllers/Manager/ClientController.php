@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\StoreClientRequest;
 use App\Http\Requests\Manager\UpdateClientRequest;
 use App\Models\User;
+use App\Notifications\ClientApprovedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -232,9 +233,12 @@ class ClientController extends Controller
             ->findOrFail($client);
 
         $client->update([
+            'is_approved' => true,
             'approved_at' => now(),
             'approved_by' => Auth::id(),
         ]);
+
+        $client->notify(new ClientApprovedNotification(Auth::user()?->name));
 
         return redirect()
             ->route('manager.clients.index')
