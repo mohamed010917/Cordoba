@@ -2,6 +2,7 @@
 import { Head, useForm } from '@inertiajs/vue3';
 import { loadStripe } from '@stripe/stripe-js';
 import { onMounted, ref } from 'vue';
+import { route } from 'ziggy-js';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -38,18 +39,44 @@ const form = useForm({
 
 const cardError = ref<string | null>(null);
 const isProcessing = ref(false);
+const isStripeReady = ref(false);
 
 onMounted(async () => {
-    stripe = await loadStripe(stripeKey);
-    elements = stripe.elements();
-    cardElement = elements.create('card');
-    cardElement.mount('#card-element');
-    cardElement.on('change', (event: any) => {
-        cardError.value = event.error ? event.error.message : null;
-    });
+    if (!stripeKey) {
+        cardError.value = 'Payment is temporarily unavailable. Missing Stripe publishable key.';
+
+        return;
+    }
+
+    try {
+        stripe = await loadStripe(stripeKey);
+
+        if (!stripe) {
+            cardError.value = 'Unable to initialize Stripe. Please try again later.';
+
+            return;
+        }
+
+        elements = stripe.elements();
+        cardElement = elements.create('card');
+        cardElement.mount('#card-element');
+        cardElement.on('change', (event: any) => {
+            cardError.value = event.error ? event.error.message : null;
+        });
+
+        isStripeReady.value = true;
+    } catch {
+        cardError.value = 'Unable to initialize payment form. Please refresh the page.';
+    }
 });
 
 const submit = async () => {
+    if (!isStripeReady.value || !stripe || !cardElement) {
+        cardError.value = 'Payment form is not ready yet. Please refresh and try again.';
+
+        return;
+    }
+
     isProcessing.value = true;
     const { token, error } = await stripe.createToken(cardElement);
 
@@ -108,11 +135,11 @@ const formatPrice = (cents: number) => {
                             <div id="card-element" class="p-3 border rounded-md bg-background"></div>
                             <p v-if="cardError" class="text-sm text-destructive mt-1">{{ cardError }}</p>
                             <InputError :message="form.errors.stripe_token" />
-                            <InputError :message="form.errors.payment" />
+                            <InputError :message="(form.errors as Record<string, string>).payment" />
                         </div>
                     </CardContent>
                     <CardFooter>
-                        <Button type="submit" class="w-full" :disabled="isProcessing || form.processing">
+                        <Button type="submit" class="w-full" :disabled="isProcessing || form.processing || !isStripeReady">
                             {{ isProcessing ? 'Processing Payment...' : `Pay ${formatPrice(room.price_cents)}` }}
                         </Button>
                     </CardFooter>
