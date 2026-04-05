@@ -20,6 +20,7 @@ use App\Http\Middleware\Receptionist;
 use App\Http\Middleware\User;
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -45,7 +46,15 @@ Route::middleware(['auth', 'verified', User::class])->group(function () {
             return redirect()->route('pending-approval');
         }
 
-        return Inertia::render('userDashbord');
+        return Inertia::render('userDashbord',[
+ 
+            "totalStays" => Auth::user()->reservations()->count(),
+            "completedStays" => Auth::user()->reservations()->where('status', 'completed')->count(),
+            "upcomingStays" => Auth::user()->reservations()->where('status', 'upcoming')->count(),
+            "loyaltyStatus" => Auth::user()->reservations()->count() >= 10 ? 'Gold' : (Auth::user()->reservations()->count() >= 5 ? 'Silver' : 'Bronze'),
+            "activeReservation" =>   Auth::user()->reservations()->where('status', 'upcoming')->with('room')->first(),
+                
+  
     })->name('dashboard');
 
     Route::get('pending-approval', function (Request $request) {

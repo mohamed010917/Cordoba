@@ -84,27 +84,10 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate mb-2">
-                    {{ activeReservation.room }}
+                    {{ activeReservation.room.name }} — Room {{ activeReservation.room.number }}
                   </p>
-                  <div class="flex items-center gap-3 mb-3">
-                    <div class="flex flex-col gap-0.5">
-                      <span class="text-[10px] uppercase tracking-widest font-semibold text-gray-400 dark:text-gray-500">Check-in</span>
-                      <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ activeReservation.checkIn }}</span>
-                    </div>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-300 dark:text-gray-600 shrink-0">
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
-                    <div class="flex flex-col gap-0.5">
-                      <span class="text-[10px] uppercase tracking-widest font-semibold text-gray-400 dark:text-gray-500">Check-out</span>
-                      <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ activeReservation.checkOut }}</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ activeReservation.nights }} nights</span>
-                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
-                      Confirmed
-                    </span>
-                  </div>
+            
+
                 </div>
               </div>
       
@@ -253,7 +236,7 @@
 </template>
 
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
+import { Head, usePage } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
@@ -268,23 +251,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 // --- Mock user from your User model ---
-const user = ref({
-  name: 'Sarah Mitchell',
-  email: 'sarah.mitchell@email.com',
-  phone: '+1 (555) 204-9812',
-  national_id: 'US-4821-X',
-  gender: 'Female',
-  country_id: 'United States',
-  city_id: 'New York',
-  image: null,
-  is_approved: true,
-  is_banned: false,
-  last_login_at: '2025-04-01 14:30',
-  role: 'user',
-})
+const page = usePage()
+const user = page.props.auth.user ;
+const totalStays = page.props.totalStays ;
+const completedStays = page.props.completedStays ;
+const upcomingStays = page.props.upcomingStays ;
+const loyaltyStatus = page.props.loyaltyStatus ;
 
 const initials = computed(() =>
-  user.value.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+  user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
 )
 
 const timeGreeting = computed(() => {
@@ -295,12 +270,12 @@ const timeGreeting = computed(() => {
 })
 
 const profileFields = computed(() => [
-  { label: 'Email',      value: user.value.email },
-  { label: 'Phone',      value: user.value.phone },
-  { label: 'Gender',     value: user.value.gender },
-  { label: 'Country',    value: user.value.country_id },
-  { label: 'City',       value: user.value.city_id },
-  { label: 'Last Login', value: user.value.last_login_at },
+  { label: 'Email',      value: user.email },
+  { label: 'Phone',      value: user.phone },
+  { label: 'Gender',     value: user.gender },
+  { label: 'Country',    value: user.country_id },
+  { label: 'City',       value: user.city_id },
+  { label: 'Last Login', value: user.last_login_at },
 ])
 
 // --- Icons ---
@@ -310,19 +285,14 @@ const IconClock    = { template: `<svg width="20" height="20" viewBox="0 0 24 24
 const IconStar     = { template: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` }
 
 const stats = [
-  { label: 'Total Stays',    value: '12',    badge: '+2 this year', icon: IconCalendar, iconClass: 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400',   badgeClass: 'text-indigo-500 dark:text-indigo-400' },
-  { label: 'Completed',      value: '10',    badge: '83% rate',     icon: IconCheck,    iconClass: 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400', badgeClass: 'text-emerald-600 dark:text-emerald-400' },
-  { label: 'Upcoming',       value: '2',     badge: 'Next: Apr 10', icon: IconClock,    iconClass: 'bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400',   badgeClass: 'text-orange-500 dark:text-orange-400' },
-  { label: 'Loyalty Points', value: '4,250', badge: 'Gold tier',    icon: IconStar,     iconClass: 'bg-yellow-50 dark:bg-yellow-950 text-yellow-600 dark:text-yellow-400',   badgeClass: 'text-yellow-600 dark:text-yellow-400' },
+  { label: 'Total Stays',    value: totalStays || 0 ,    badge: '+2 this year', icon: IconCalendar, iconClass: 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400',   badgeClass: 'text-indigo-500 dark:text-indigo-400' },
+  { label: 'Completed',      value: completedStays || 0,    badge: '83% rate',     icon: IconCheck,    iconClass: 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400', badgeClass: 'text-emerald-600 dark:text-emerald-400' },
+  { label: 'Upcoming',       value: upcomingStays || 0,     badge: 'Next: Apr 10', icon: IconClock,    iconClass: 'bg-orange-50 dark:bg-orange-950 text-orange-600 dark:text-orange-400',   badgeClass: 'text-orange-500 dark:text-orange-400' },
+  { label: 'Loyalty Points', value: loyaltyStatus || 0, badge: 'Gold tier',    icon: IconStar,     iconClass: 'bg-yellow-50 dark:bg-yellow-950 text-yellow-600 dark:text-yellow-400',   badgeClass: 'text-yellow-600 dark:text-yellow-400' },
 ]
 
 // --- Active Reservation ---
-const activeReservation = ref({
-  room: 'Deluxe Ocean Suite — Room 412',
-  checkIn: 'Apr 10, 2025',
-  checkOut: 'Apr 15, 2025',
-  nights: 5,
-})
+const activeReservation = page.props.activeReservation || null
 
 // --- Reservations Table ---
 const reservations = ref([
